@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    ViewData["SaveEnable"] = true;
+}
+
+<div class="text-center py-5" style="background: linear-gradient(to bottom right, #f9f9ff, #eaf6ff); min-height: 85vh;">
+    <h1 class="display-4 text-primary mb-3">Welcome to Our Website!</h1>
+
+    <p class="lead text-secondary">
+        Hello @(User?.Identity?.Name ?? "Guest"), we're glad to have you here.
+    </p>
+
+    <div class="d-flex justify-content-center align-items-center flex-column mt-4">
+        <div style="max-width: 250px;">
+            <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzhqc2wwdnowbGxpYng1M2lhaG1vM3NmbDd6bnJmY3h6ZmNmbzAzeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/rugsdufFmMQsezjH18/giphy.gif"
+                 alt="Welcome GIF"
+                 style="width: 100%; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        </div>
+
+        <p class="mt-4 text-muted">
+            Explore our features and feel free to connect. Your journey starts here!
+        </p>
+    </div>
+</div>

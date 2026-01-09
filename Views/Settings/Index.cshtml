@@ -1,0 +1,213 @@
+﻿@using Microsoft.Extensions.Localization
+@inject IViewLocalizer Localizer
+
+@model AvicennaDispensing.ViewModels.SettingsViewModel
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    ViewData["Title"] = Localizer["Title"];
+    var userTheme = Context.Request.Cookies["UserTheme"] ?? "light";
+    var userLanguage = Context.Request.Cookies["UserLanguage"] ?? "en";
+}
+
+@section Styles {
+    <link rel="stylesheet" href=@Url.Content("~/css/Pages/Settings.css") asp-append-version="true" />
+}
+
+<div class="alert alert-danger text-center alert-viewbag-error m-3" role="alert">
+    @Localizer["ThemeLanguageSupport"]
+</div>
+
+<div class="settings-container" data-theme="@userTheme">
+    <div class="settings-header">
+        <h1><i class="bi bi-gear-fill"></i> @Localizer["Title"]</h1>
+        <p>@Localizer["ManageYourAccountSettings"]</p>
+    </div>
+
+    <!-- Profile Information Card -->
+    <div class="settings-card">
+        <div class="card-header-custom profile">
+            <i class="bi bi-person-circle"></i>
+            <span>@Localizer["ProfileInformation"]</span>
+        </div>
+        <div class="card-body-custom">
+            <div class="user-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="user-info-badge">
+                <h5 class="mb-1 text-center"><i class="bi bi-person-badge"></i> @Model.UserName</h5>
+                <small class="d-block text-center">@Localizer["UserID"]: @Model.UserID</small>
+            </div>
+
+            <div class="info-item">
+                <i class="bi bi-person-fill"></i>
+                <div>
+                    <strong>@Localizer["UserName"]</strong>
+                    <div>@Model.UserName</div>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <i class="bi bi-shield-check"></i>
+                <div>
+                    <strong>@Localizer["UserID"]</strong>
+                    <div>@Model.UserID</div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-3 flex-wrap">
+                <span class="badge-custom badge-success-custom">
+                    <i class="bi bi-check-circle-fill"></i> @Localizer["ActiveAccount"]
+                </span>
+                <span class="badge-custom badge-info-custom">
+                    <i class="bi bi-translate"></i> @(userLanguage == "en" ? Localizer["English"] : Localizer["BahasaIndonesia"])
+                </span>
+            </div>
+
+            <form id="profileForm">
+                <div class="form-group-custom">
+                    <label class="form-label-custom">
+                        <i class="bi bi-envelope-fill"></i>
+                        @Localizer["Email"]:
+                    </label>
+                    <input type="email" class="form-control form-control-custom" id="email" value="@Model.Email" placeholder="@Localizer["EmailPlaceholder"]">
+                </div>
+
+                <button type="submit" class="btn btn-custom btn-primary-custom">
+                    <i class="bi bi-check-circle"></i> @Localizer["UpdateProfile"]
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Settings Card -->
+    <div class="settings-card">
+        <div class="card-header-custom security">
+            <i class="bi bi-shield-lock-fill"></i>
+            <span>@Localizer["Security"]</span>
+        </div>
+        <div class="card-body-custom">
+            <form id="passwordForm">
+                <div class="form-group-custom">
+                    <label class="form-label-custom">
+                        <i class="bi bi-key-fill"></i>
+                        @Localizer["CurrentPassword"]
+                    </label>
+                    <input type="password" class="form-control form-control-custom" id="currentPassword" required>
+                </div>
+
+                <div class="form-group-custom">
+                    <label class="form-label-custom">
+                        <i class="bi bi-lock-fill"></i>
+                        @Localizer["NewPassword"]
+                    </label>
+                    <input type="password" class="form-control form-control-custom" id="newPassword" required>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strengthBar"></div>
+                    </div>
+                    <small class="text-muted" id="strengthText">@Localizer["PasswordStrength"]</small>
+                </div>
+
+                <div class="form-group-custom">
+                    <label class="form-label-custom">
+                        <i class="bi bi-lock-fill"></i>
+                        @Localizer["ConfirmNewPassword"]
+                    </label>
+                    <input type="password" class="form-control form-control-custom" id="confirmPassword" required>
+                </div>
+
+                <button type="submit" class="btn btn-custom btn-primary-custom" id="changePasswordBtn">
+                    <i class="bi bi-shield-check"></i> @Localizer["ChangePassword"]
+                </button>
+            </form>
+
+            <div class="tip-box">
+                <i class="bi bi-lightbulb-fill"></i>
+                <strong>@Localizer["SecurityTip"]</strong> @Localizer["SecurityTipMessage"]
+            </div>
+        </div>
+    </div>
+
+    <!-- Appearance Settings Card -->
+    <div class="settings-card">
+        <div class="card-header-custom appearance">
+            <i class="bi bi-palette-fill"></i>
+            <span>@Localizer["Appearance"]</span>
+        </div>
+        <div class="card-body-custom">
+            <h6 class="mb-3"><i class="bi bi-moon-stars-fill"></i> @Localizer["Theme"]</h6>
+            <div class="theme-toggle-container">
+                <div class="theme-option @(userTheme == "light" ? "active" : "")" data-theme="light">
+                    <div class="theme-icon">☀️</div>
+                    <strong>@Localizer["Light"]</strong>
+                </div>
+                <div class="theme-option @(userTheme == "dark" ? "active" : "")" data-theme="dark">
+                    <div class="theme-icon">🌙</div>
+                    <strong>@Localizer["Dark"]</strong>
+                </div>
+                @* <div class="theme-option @(userTheme == "auto" ? "active" : "")" data-theme="auto">
+                    <div class="theme-icon">🔄</div>
+                    <strong>@SettingsLocalizer["Auto"]</strong>
+                </div> *@
+            </div>
+
+            @* <div class="tip-box">
+                <i class="bi bi-info-circle-fill"></i>
+                <strong>@SettingsLocalizer["ThemeInfo"]</strong> @SettingsLocalizer["ThemeInfoMessage"]
+            </div> *@
+
+            <hr class="my-4">
+
+            <h6 class="mb-3"><i class="bi bi-translate"></i> @Localizer["Language"]</h6>
+            <div id="languageOptions">
+                <div class="language-option @(userLanguage == "en" ? "active" : "")" data-lang="en">
+                    <span class="language-flag">EN</span>
+                    <div>
+                        <strong>@Localizer["English"]</strong>
+                        @* <div class="text-muted small">@SettingsLocalizer["International"]</div> *@
+                    </div>
+                </div>
+                <div class="language-option @(userLanguage == "id" ? "active" : "")" data-lang="id">
+                    <span class="language-flag">ID</span>
+                    <div>
+                        <strong>@Localizer["BahasaIndonesia"]</strong>
+                        @* <div class="text-muted small">@SettingsLocalizer["Indonesian"]</div> *@
+                    </div>
+                </div>
+            </div>
+
+            @* <div class="tip-box mt-3">
+                <i class="bi bi-info-circle-fill"></i>
+                <strong>@SettingsLocalizer["LanguageInfo"]</strong> @SettingsLocalizer["LanguageInfoMessage"]
+            </div> *@
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Localized strings for JavaScript
+        window.LocalizedStrings = {
+            passwordMismatch: '@Localizer["PasswordMismatch"]',
+            passwordMismatchMessage: '@Localizer["PasswordMismatchMessage"]',
+            passwordTooShort: '@Localizer["PasswordTooShort"]',
+            passwordTooShortMessage: '@Localizer["PasswordTooShortMessage"]',
+            success: '@Localizer["Success"]',
+            error: '@Localizer["Error"]',
+            errorOccurred: '@Localizer["ErrorOccurred"]',
+            changing: '@Localizer["Changing"]',
+            themeUpdated: '@Localizer["ThemeUpdated"]',
+            themeUpdatedMessage: '@Localizer["ThemeUpdatedMessage"]',
+            themeUpdatedSuccessfully: '@Localizer["ThemeUpdatedSuccessfully"]',
+            languageUpdated: '@Localizer["LanguageUpdated"]',
+            languageUpdatedID: '@Localizer["LanguageUpdatedID"]',
+            languageReloadMessage: '@Localizer["LanguageReloadMessage"]',
+            languageReloadMessageID: '@Localizer["LanguageReloadMessageID"]',
+            passwordRequirement: '@Localizer["PasswordRequirement"]',
+            passwordWeak: '@Localizer["PasswordWeak"]',
+            passwordMedium: '@Localizer["PasswordMedium"]',
+            passwordStrong: '@Localizer["PasswordStrong"]'
+        };
+    </script>
+    <script src="~/js/Pages/Settings.js" asp-append-version="true"></script>
+}

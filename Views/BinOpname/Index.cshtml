@@ -1,0 +1,86 @@
+﻿@model IEnumerable<BinOpnameViewModel.BinOpnameList>
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    ViewData["Title"] = "Opname";
+    var search = ViewBag.Search as string ?? string.Empty;
+    var startDate = ViewBag.StartDate as string ?? string.Empty;
+    var endDate = ViewBag.EndDate as string ?? string.Empty;
+    var maxDate = DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+<div class="alert alert-danger text-center alert-viewbag-error m-3" role="alert">
+    @CommonLocalizer["OnDevelopment"]
+</div>
+
+<div class="mb-4">
+    <form id="formTransactionSearch" method="get" asp-action="Index" >
+        <div class="d-flex align-items-center gap-3">
+            <input class="search form-control" placeholder="🔍 Search Transaction No..." value="@search" name="TransactionNo" />
+            <button type="submit" id="btnTransactionSearch" name="context" value="Search" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <form id="formDateFilter" method="get" asp-action="Index" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label for="StartDate" class="form-label">From Date</label>
+            <input type="date" class="form-control" id="StartDate" name="StartDate" value="@startDate" max="@maxDate" />
+        </div>
+        <div class="col-md-3">
+            <label for="EndDate" class="form-label">To Date</label>
+            <input type="date" class="form-control" id="EndDate" name="EndDate" value="@endDate" max="@maxDate" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" id="btnDateFilter" name="context" value="DateFilter" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="row">
+    @if (!Model.Any())
+    {
+        @if (search.Any())
+        {
+            <div class="text-muted d-flex justify-content-center mt-4"> TransactionNo "@(search)" not found </div>
+        }
+        else if (startDate.Any())
+        {
+            <div class="text-muted d-flex justify-content-center mt-4"> No Transaction found from @startDate to @(string.IsNullOrEmpty(endDate) ? DateTime.Now.ToString("yyyy-MM-dd") : endDate) </div>
+        }
+        else
+        {
+            <div class="text-muted d-flex justify-content-center mt-4"> No Transaction before @(string.IsNullOrEmpty(endDate) ? DateTime.Now.ToString("yyyy-MM-dd") : endDate) </div>
+        }
+    }
+    else
+    {
+        @foreach (var Transaction in Model)
+        {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <form asp-action="DetailTransaction" method="get">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body bg-light text-start w-100">
+                            <h5 class="card-title text-center">@Transaction.TransactionNo</h5>
+                            <button type="submit" id="btnDetailTransaction" class="text-start" name="TransactionNo" value="@Transaction.TransactionNo" style="border: none; background: none;">
+                                <p class="card-text mb-1"><strong>Date:</strong> @Transaction.TransactionDate.ToString("yyyy-MM-dd")</p>
+                                <p class="card-text mb-1">Page(s): @Transaction.FilterList.Count</p>
+                                <p class="card-text mb-1">Approve(s): @Transaction.FilterList.Count(a => a.isApproved == true)</p>
+                                <p class="card-text">
+                                @foreach (var item in Transaction.FilterList)
+                                {
+                                    <span class="badge @(item.isApproved == true ? "bg-success" : "bg-secondary")">
+                                        @item.FilterName
+                                    </span>
+                                }
+                                </p>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts{
+    <script src="@Url.Content("~/js/Pages/BinOpname.js")"></script>
+}

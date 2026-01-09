@@ -1,0 +1,17 @@
+﻿@inject IStringLocalizerFactory Factory
+
+@{
+    Layout = null;
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+}
+<form id="formToolbar" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="toolbarData" name="toolbarData" value="@(ViewBag.ToolBarData ?? string.Empty)" />
+    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group me-2" role="group" aria-label="Main actions">
+            <button type="submit" name="action" value="Save" formaction="@Url.Action("Save")" class="btn btn-success" id="btnSave" @(ViewBag.Mode == AppEnum.DataMode.Edit && (User.FindFirst(ClaimTypesCustom.CRUD)?.Value == "true") ? "" : "hidden")>💾 @CommonLocalizer["Save"]</button>
+            <button type="submit" name="action" value="Edit" formaction="@Url.Action("Edit")" class="btn btn-primary" id="btnEdit" @(ViewBag.Mode == AppEnum.DataMode.View && (User.FindFirst(ClaimTypesCustom.CRUD)?.Value == "true") ? "" : "hidden")>✏️ @CommonLocalizer["Edit"]</button>
+            <button type="submit" name="action" value="Cancel" formaction="@Url.Action("Cancel")" class="btn btn-secondary" id="btnCancel" @(ViewBag.Mode == AppEnum.DataMode.Edit && (User.FindFirst(ClaimTypesCustom.CRUD)?.Value == "true") ? "" : "hidden")>❌ @CommonLocalizer["Cancel"]</button>
+        </div>
+    </div>
+</form>

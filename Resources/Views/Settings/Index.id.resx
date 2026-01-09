@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActiveAccount" xml:space="preserve">
+    <value>Akun Aktif</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Tampilan</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Otomatis</value>
+  </data>
+  <data name="BahasaIndonesia" xml:space="preserve">
+    <value>Bahasa Indonesia</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Ubah Kata Sandi</value>
+  </data>
+  <data name="Changing" xml:space="preserve">
+    <value>Mengubah</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Konfirmasi Kata Sandi Baru</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Kata Sandi Saat Ini</value>
+  </data>
+  <data name="CurrentPasswordIsIncorrect" xml:space="preserve">
+    <value>Password salah</value>
+  </data>
+  <data name="Dark" xml:space="preserve">
+    <value>Gelap</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>charitas@outlook.com</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Kesalahan</value>
+  </data>
+  <data name="ErrorOccurred" xml:space="preserve">
+    <value>Terjadi Kesalahan</value>
+  </data>
+  <data name="Indonesian" xml:space="preserve">
+    <value>Bahasa Indonesia</value>
+  </data>
+  <data name="International" xml:space="preserve">
+    <value>Internasional</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Bahasa</value>
+  </data>
+  <data name="LanguageInfo" xml:space="preserve">
+    <value>Informasi Bahasa</value>
+  </data>
+  <data name="LanguageInfoMessage" xml:space="preserve">
+    <value>Pilih bahasa yang Anda inginkan untuk ditampilkan di aplikasi</value>
+  </data>
+  <data name="LanguageReloadMessage" xml:space="preserve">
+    <value>The page will be reloaded to apply the language changes.</value>
+  </data>
+  <data name="LanguageReloadMessageID" xml:space="preserve">
+    <value>Halaman akan dimuat ulang untuk menerapkan perubahan bahasa</value>
+  </data>
+  <data name="LanguageUpdated" xml:space="preserve">
+    <value>Language Updated</value>
+  </data>
+  <data name="LanguageUpdatedID" xml:space="preserve">
+    <value>Bahasa Berhasil Diperbarui</value>
+  </data>
+  <data name="LanguageUpdatedSuccessfully" xml:space="preserve">
+    <value>Bahasa berhasil diubah</value>
+  </data>
+  <data name="Light" xml:space="preserve">
+    <value>Terang</value>
+  </data>
+  <data name="ManageYourAccountSettings" xml:space="preserve">
+    <value>Kelola Pengaturan Akun Anda</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Kata Sandi Baru</value>
+  </data>
+  <data name="PasswordChangedSuccessfully" xml:space="preserve">
+    <value>Kata sandi berhasil diubah</value>
+  </data>
+  <data name="PasswordMedium" xml:space="preserve">
+    <value>Sedang</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>Kata Sandi Tidak Cocok</value>
+  </data>
+  <data name="PasswordMismatchMessage" xml:space="preserve">
+    <value>Kata sandi baru dan konfirmasi kata sandi tidak cocok</value>
+  </data>
+  <data name="PasswordMustBeAtLeast" xml:space="preserve">
+    <value>Kata sandi minimal 6 karakter</value>
+  </data>
+  <data name="PasswordStrength" xml:space="preserve">
+    <value>Kekuatan Kata Sandi</value>
+  </data>
+  <data name="PasswordStrong" xml:space="preserve">
+    <value>Kuat</value>
+  </data>
+  <data name="PasswordTooShort" xml:space="preserve">
+    <value>Kata Sandi Terlalu Pendek</value>
+  </data>
+  <data name="PasswordTooShortMessage" xml:space="preserve">
+    <value>Kata sandi harus minimal 6 karakter</value>
+  </data>
+  <data name="PasswordWeak" xml:space="preserve">
+    <value>Lemah</value>
+  </data>
+  <data name="ProfileInformation" xml:space="preserve">
+    <value>Informasi Profil</value>
+  </data>
+  <data name="ProfileUpdatedSuccessfully" xml:space="preserve">
+    <value>Profile berhasil diubah</value>
+  </data>
+  <data name="Security" xml:space="preserve">
+    <value>Keamanan</value>
+  </data>
+  <data name="SecurityTip" xml:space="preserve">
+    <value>Tips Keamanan</value>
+  </data>
+  <data name="SecurityTipMessage" xml:space="preserve">
+    <value>Gunakan kombinasi huruf besar, huruf kecil, angka, dan simbol untuk kata sandi yang lebih kuat</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Berhasil</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="ThemeInfo" xml:space="preserve">
+    <value>Informasi Tema</value>
+  </data>
+  <data name="ThemeInfoMessage" xml:space="preserve">
+    <value>Pilih tema yang Anda inginkan untuk ditampilkan di aplikasi</value>
+  </data>
+  <data name="ThemeLanguageSupport" xml:space="preserve">
+    <value>Tema dan Bahasa dalam pengembangan (tidak semua halaman mendukungnya)</value>
+  </data>
+  <data name="ThemeUpdated" xml:space="preserve">
+    <value>Tema Berhasil Diperbarui</value>
+  </data>
+  <data name="ThemeUpdatedMessage" xml:space="preserve">
+    <value>Tema berhasil diperbarui</value>
+  </data>
+  <data name="ThemeUpdatedSuccessfully" xml:space="preserve">
+    <value>Tema Berhasil Diperbarui</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Pengaturan</value>
+  </data>
+  <data name="UpdateProfile" xml:space="preserve">
+    <value>Perbarui Profil</value>
+  </data>
+  <data name="UserID" xml:space="preserve">
+    <value>ID Pengguna</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>Nama Pengguna</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>Pengguna tidak ditemukan</value>
+  </data>
+</root>

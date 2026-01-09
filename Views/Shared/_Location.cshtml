@@ -1,0 +1,80 @@
+﻿@inject IStringLocalizerFactory Factory
+@model dynamic
+
+@{
+    bool hasLocations = false;
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    string? ActionRoute = Model?.ActionRoute;
+    string? ControllerRoute = ViewContext.RouteData.Values["controller"]?.ToString();
+    
+    try
+    {
+        if (Model?.LocationList != null)
+        {
+            hasLocations = ((System.Collections.IEnumerable)Model.LocationList).Cast<object>().Any();
+        }
+    }
+    catch
+    {
+        hasLocations = false;
+    }
+}
+
+@if (!string.IsNullOrWhiteSpace(Model?.SelectedLocationID) || hasLocations)
+{
+    <div class="mb-4 p-3 bg-light rounded-3 shadow-sm border border-primary-subtle location-container">
+        <div class="row align-items-center g-2">
+            <div class="col-auto">
+                <h6 class="mb-0 text-primary fw-semibold d-flex align-items-center location-label">
+                    <i class="bi bi-geo-alt-fill me-2"></i> @CommonLocalizer["Location"]
+                </h6>
+            </div>
+            <div class="col pe-4">
+                @if (ViewBag.Mode == AppEnum.DataMode.View || ViewBag.Mode == null)
+                {
+                    @using (Html.BeginForm(ActionRoute ?? "Index", ControllerRoute, FormMethod.Get))
+                    {
+                        @* Preserve other query parameters if they exist *@
+                        @if (ViewContext.HttpContext.Request.Query.ContainsKey("md"))
+                        {
+                            <input type="hidden" name="md" value="@ViewContext.HttpContext.Request.Query["md"]" />
+                        }
+                        @if (ViewContext.HttpContext.Request.Query.ContainsKey("SelectionType"))
+                        {
+                            <input type="hidden" name="SelectionType" value="@ViewContext.HttpContext.Request.Query["SelectionType"]" />
+                        }
+                        @if (ViewContext.HttpContext.Request.Query.ContainsKey("TransactionNo"))
+                        {
+                            <input type="hidden" name="TransactionNo" value="@ViewContext.HttpContext.Request.Query["TransactionNo"]" />
+                        }
+                        
+                        @Html.DropDownList(
+                        "LocID", //Parameter
+                        new SelectList(
+                        ((System.Collections.IEnumerable)Model!.LocationList)
+                                .Cast<dynamic>()
+                                .OrderBy((Func<dynamic, object>)(l => l.LocationName)), // Source List
+                            "LocationID", //Value
+                            "LocationName", //Text
+                            Model.SelectedLocationID
+                        ),
+                        CommonLocalizer["-- Select Location --"],
+                        new
+                        {
+                            @class = "form-select",
+                            id = "selectLocation",
+                            data_placeholder = CommonLocalizer["-- Select Location --"]
+                        }
+                        )
+                    }
+                }
+                else
+                {
+                    <span class="badge bg-primary text-white fs-6 text-wrap location-badge" id="selectedLocation" data-locid="@Model!.SelectedLocationID">
+                        <i class="bi bi-pin-map-fill"></i> @Model.SelectedLocationName
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+}

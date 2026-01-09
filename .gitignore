@@ -1,0 +1,34 @@
+# Build Result
+bin/
+obj/
+
+# User Specific File
+*.user
+
+# Visual Studio
+*.vs/
+
+# Log file
+/Logs
+*.log
+
+# Setting
+appsettings.json
+appsettings.Development.json
+*.settings
+secrets.json
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+
+# Azure / DevOps artifacts
+*.publishsettings
+*.pubxml
+*.pubxml.user
+
+README.md
+copilot-instructions.md
+
+docs/

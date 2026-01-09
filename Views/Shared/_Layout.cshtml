@@ -1,0 +1,205 @@
+﻿@using AvicennaDispensing.Helpers
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    var BasePath = HttpContextAccessor.HttpContext?.Request.PathBase.Value ?? string.Empty;
+    var homeUrl = Configuration["ProgramSettings:Home"];
+    bool SaveEnable = ViewData["SaveEnable"] as bool? ?? true;
+    bool isUsedCamera = ViewData["Camera"] as bool? ?? false;    
+    var userTheme = Context.Request.Cookies["UserTheme"]?.ToLower() ?? "light";    
+    var userLanguage = Context.Request.Cookies["UserLanguage"]?.ToLower() ?? "en";
+}
+
+<!DOCTYPE html>
+<html lang="@userLanguage" data-theme="@userTheme">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Avicenna Dispensing</title>
+    <link rel="stylesheet" href="@($"{BasePath}/lib/bootstrap/dist/css/bootstrap.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/lib/bootstrap/icon/bootstrap-icons.min.css")" />
+    <link rel="stylesheet" href="@($"{BasePath}/lib/SweetAlert/sweetalert2.min.css")" />
+    <link rel="stylesheet" href="@($"{BasePath}/lib/select2/css/select2.min.css")" />
+    <link rel="stylesheet" href="@($"{BasePath}/lib/select2/css/select2-bootstrap-5-theme.min.css")" />
+    <link rel="stylesheet" href="@($"{BasePath}/css/site.css")" asp-append-version="true" />
+    @if(!Env.IsDevelopment())
+    {
+        <link rel="stylesheet" href="@($"{BasePath}/Avicenna.styles.css")" asp-append-version="true" />
+    }
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Charitas</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+@*                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li> *@
+                        <li class="nav-item menu-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="OpenBatch" asp-action="Index">
+                                <i class="bi bi-box-seam"></i> @CommonLocalizer["OpenBatch"]
+                            </a>
+                        </li>
+                        <li class="nav-item menu-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="InventoryBin" asp-action="Index">
+                                <i class="bi bi-archive"></i> @CommonLocalizer["BinStock"]
+                            </a>
+                        </li>
+                        <li class="nav-item menu-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="InventoryBin" asp-action="BinMasterIndex">
+                                <i class="bi bi-box"></i> @CommonLocalizer["BinMaster"]
+                            </a>
+                        </li>
+                        <li class="nav-item menu-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="BinTransfer" asp-action="Index">
+                                <i class="bi bi-arrow-left-right"></i> @CommonLocalizer["BinTransfer"]
+                            </a>
+                        </li>
+                        @* @if (Env.IsDevelopment())
+                        { *@
+                            <li class="nav-item menu-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ServiceUnitTransactionEntry" asp-action="Index">
+                                    <i class="bi bi-tools"></i> @CommonLocalizer["SUTE"]
+                                </a>
+                            </li>
+                            <li class="nav-item menu-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="BinOpname" asp-action="Index">
+                                    <i class="bi bi-file-earmark-medical"></i> @CommonLocalizer["StockOpname"]
+                                </a>
+                            </li>
+                        @* } *@
+                        <li class="nav-item menu-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Dispensing" asp-action="Index">
+                                <i class="bi bi-cart-fill"></i> @CommonLocalizer["Dispensing"]
+                            </a>
+                        </li>
+                        @*                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li> *@
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @(User.FindFirst(ClaimTypesCustom.UserName)?.Value ?? User.Identity.Name)
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropDown">
+                                    <li>
+                                        <a class="dropdown-item" href="@homeUrl" target="_blank">
+                                            <i class="bi bi-house-fill"></i> Avicenna
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Settings" asp-action="Index">
+                                            <i class="bi bi-gear-fill"></i> @CommonLocalizer["Settings"]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+                                    <li>
+                                        <form asp-controller="Login" asp-action="Logout" method="post" class="form-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-start w-100">
+                                                <i class="bi bi-box-arrow-right"></i> @CommonLocalizer["Logout"]
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    @if (ViewBag.Error != null && !string.IsNullOrWhiteSpace(ViewBag.Error))
+    {
+        <div class="alert alert-danger text-center alert-viewbag-error" role="alert">
+            @ViewBag.Error
+        </div>
+    }
+
+    <div class="container">
+        @if (ViewBag.Mode != null)
+        {
+            <div id="toolbarContainer">
+                @await Html.PartialAsync("_Toolbar")
+            </div>
+        }
+
+        <main role="main" class="pb-3">
+            @if (!SaveEnable)
+            {
+                <div class="alert alert-danger text-center alert-viewbag-error m-3" role="alert">
+                    @CommonLocalizer["SaveFunctionDisable"]
+                </div>
+            }
+            @if (!(User.FindFirst(ClaimTypesCustom.CRUD)?.Value == "true"))
+            {
+                <div class="alert alert-primary d-flex align-items-center justify-content-center shadow-sm rounded-3 py-3 mb-4" role="alert">
+                    <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                    <div>
+                        @Html.Raw(CommonLocalizer["ViewOnlyAcess"])
+                    </div>
+                </div>
+            }
+            @if (Env.IsDevelopment())
+            {
+                <div class="alert alert-info">
+                    <strong>Debug Info:</strong><br/>
+                    Language Claim: @userLanguage<br/>
+                    Current Culture: @System.Globalization.CultureInfo.CurrentCulture.Name<br/>
+                    Current UI Culture: @System.Globalization.CultureInfo.CurrentUICulture.Name
+                </div>
+            }
+            @RenderBody()
+        </main>
+        @if(isUsedCamera)
+        {
+            @await Html.PartialAsync("_Camera")
+        }
+    </div>
+
+    <footer class="border-top footer text-muted p-2 d-flex d-inline">
+        <div class="container">
+@*             &copy; 2025 - Avicenna - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+            &copy; 2025 - Charitas
+        </div>
+        <small>App Version: @VersionHelper.GetAppVersion()</small>
+    </footer>
+    @* <script> *@
+    @*     var saveUrl = '@Url.Action("Save")' *@
+    @*     var editUrl = '@Url.Action("Edit")' *@
+    @*     var cancelUrl = '@Url.Action("Cancel")' *@
+    @*     var ToolbarUrl = '@Url.Action("Toolbar")' *@
+    @* </script>  *@
+    <script src="@($"{BasePath}/lib/jquery/dist/jquery.min.js")"></script>
+    <script src="@($"{BasePath}/lib/jquery-code-scanner.js")"></script>
+    <script src="@($"{BasePath}/lib/big/big.js")"></script>
+    <script src="@($"{BasePath}/lib/bootstrap/dist/js/bootstrap.bundle.min.js")"></script>
+    <script src="@($"{BasePath}/lib/SweetAlert/sweetalert2.min.js")"></script>
+    <script src="@($"{BasePath}/lib/select2/js/select2.min.js")"></script>
+    <script src="@($"{BasePath}/js/theme.js")" asp-append-version="true"></script>
+    <script src="@($"{BasePath}/js/site.js")" asp-append-version="true"></script>
+    <script src="@($"{BasePath}/js/toolbar.js")"></script>
+    @if (isUsedCamera)
+    {
+        <script src="@($"{BasePath}/lib/html5-qrcode-master/html5-qrcode.min.js")"></script>
+        <script src="@($"{BasePath}/js/camera.js")"></script>
+    }
+    @await RenderSectionAsync("Styles", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
+    <form id="antiForgeryForm" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+</body>
+</html>

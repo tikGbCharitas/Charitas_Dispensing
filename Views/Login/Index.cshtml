@@ -1,0 +1,103 @@
+﻿@model AppUser
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+        body {
+            background-image: url('@Url.Content("~/images/FabricTropicalForestWaterfall.jpg")');
+            background-size: cover;
+            background-position: center;
+            backdrop-filter: blur(30px);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+
+        .alert-viewbag-error {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow rounded-4 p-3">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4">Login</h2>
+
+                        <form asp-action="Login" method="post" id="loginForm" onsubmit="document.getElementById('btnLogin').disabled = true">
+                            @Html.AntiForgeryToken()
+                            
+                            <div class="mb-3">
+                                <label asp-for="UserID" class="form-label"></label>
+                                <input asp-for="UserID" name="userid" class="form-control" value="@ViewBag.UserID" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <input asp-for="Password" name="password" type="password" class="form-control" />
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe" @(TempData["rememberMe"] as bool? == true ? "checked" : "") />
+                                <label class="form-check-label" for="rememberMe">
+                                    Remember me
+                                </label>
+                                <input type="hidden" name="rememberMe" id="rememberMeValue" value="false" />
+                            </div>
+
+                            @if (ViewBag.ErrorMessage != null)
+                            {
+                                <div class="alert alert-danger text-center alert-viewbag-error" role="alert">
+                                    @ViewBag.ErrorMessage
+                                </div>
+                            }
+
+                            <div class="d-grid">
+                                <button type="submit" id="btnLogin" class="btn btn-primary">Login</button>
+                            </div>
+                        </form>
+
+                        @if (Env.IsDevelopment())
+                        {
+                            <hr class="my-4" />
+                            <form method="post" asp-action="DevLogin" id="devLoginForm">
+                                @Html.AntiForgeryToken()
+                                
+                                <input type="hidden" name="rememberMe" id="devRememberMeValue" value="false" />
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-secondary">Dev Login</button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="@Url.Content("~/js/Pages/Login.js")"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+@model List<AvicennaDispensing.ViewModels.BinTransferViewModel.BinDetail>
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    var IndexLocalizer = Factory.Create("Views.BinTransfer.Index", Assembly.GetExecutingAssembly().GetName().Name!);
+}
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">@CommonLocalizer["NoItem"]</div>
+}
+else
+{
+    <span class="text-muted">@IndexLocalizer["Found"] : @Model.Count() @Localizer["item(s)"]</span>
+
+    @foreach (var bin in Model)
+    {
+        <a href="#" class="list-group-item list-group-item-action wizard-bin-item" 
+           data-bin-id="@bin.BinID" data-bin-name="@bin.BinName">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                <div class="flex-grow-1">
+                    <h6 class="mb-0 text-truncate">
+                        <i class="bi bi-box"></i> @Html.HighlightSearch(bin.BinName)
+                    </h6>
+                </div>
+                <span class="badge bg-primary rounded-pill flex-shrink-0">@bin.ItemCount.ToString(CultureInfo.InvariantCulture) items</span>
+            </div>
+        </a>
+    }
+}

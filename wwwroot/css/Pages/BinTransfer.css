@@ -1,0 +1,256 @@
+﻿/* Bin Transfer Page Styles */
+
+/* Transfer Group Styles */
+.transfer-group {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+    position: relative;
+}
+
+.transfer-group.completed {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.transfer-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.bin-badge {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.item-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.item-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.item-checkbox, .wizard-item-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.bin-item, .wizard-bin-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.bin-item:hover, .wizard-bin-item:hover {
+    background-color: #f0f8ff !important;
+    transform: translateX(3px);
+    border-left-color: #007bff;
+}
+
+.wizard-bin-item.active {
+    background-color: #cfe2ff !important;
+    border-left: 4px solid #0d6efd !important;
+    border-color: #0d6efd !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+    color: #052c65 !important;
+}
+
+.wizard-bin-item.active:hover {
+    background-color: #cfe2ff !important;
+    border-left-color: #0d6efd !important;
+    color: #052c65 !important;
+}
+
+.wizard-bin-item.active .badge {
+    background-color: #0d6efd !important;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+    color: #ffffff !important;
+}
+
+.wizard-bin-item.active h6 {
+    color: #052c65 !important;
+}
+
+/* Variants Detail */
+.variants-detail {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.variants-detail .table {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+}
+
+.variants-detail thead th {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.btn-show-variants {
+    padding: 2px 8px;
+    font-size: 0.875rem;
+}
+
+.step-indicator {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    text-align: center;
+    line-height: 30px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.step-indicator.active {
+    background: #007bff;
+}
+
+.step-indicator.completed {
+    background: #28a745;
+}
+
+.transfer-arrow {
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+/* Wizard Styles */
+.wizard-steps {
+    padding: 10px 0;
+}
+
+.wizard-steps .step {
+    display: flex;
+    align-items: center;
+    color: #6c757d;
+    transition: all 0.3s;
+}
+
+.wizard-steps .step.active {
+    color: #007bff;
+}
+
+.wizard-steps .step.completed {
+    color: #28a745;
+}
+
+.wizard-steps .step-number {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.wizard-steps .step.active .step-number {
+    background: #007bff;
+    color: white;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.wizard-steps .step.completed .step-number {
+    background: #28a745;
+    color: white;
+}
+
+.wizard-steps .step-label {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.wizard-steps .step-divider {
+    height: 2px;
+    background: #e9ecef;
+    transition: all 0.3s;
+}
+
+.wizard-steps .step.completed + .step-divider {
+    background: #28a745;
+}
+
+.wizard-content {
+    min-height: 400px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.transfer-summary-box {
+    border: 2px dashed #dee2e6;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .transfer-group {
+        padding: 10px;
+    }
+
+    .bin-badge {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+
+    .item-card {
+        font-size: 0.9rem;
+    }
+
+    .wizard-steps .step-label {
+        font-size: 11px;
+    }
+
+    .wizard-steps .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .transfer-summary-box {
+        padding: 15px !important;
+    }
+
+    .variants-detail .table {
+        font-size: 0.75rem;
+    }
+
+    .variants-detail thead th {
+        font-size: 0.7rem;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

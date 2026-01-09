@@ -1,0 +1,187 @@
+﻿@model InventoryBinViewModel.BinMasterViewModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizerFactory Factory
+@inject IViewLocalizer Localizer
+
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    var SelectedLocation = Model.Locations?.SelectedLocationID;
+    ViewData["Title"] = CommonLocalizer["BinMaster"];
+    ViewData["Camera"] = true;
+}
+
+<div class="text-center mb-4">
+    <h2 class="d-inline-block border-bottom border-1 border-primary pb-2">
+        @CommonLocalizer["BinMaster"]
+    </h2>
+</div>
+
+<div class="my-3">
+    <div class="input-group flex-wrap">
+        <button type="button" id="chkAllBinsControl" class="btn btn-outline-secondary me-2 mb-2 mb-sm-0" value="0">
+            <i class="bi me-1"></i> @Localizer["SelectAll"]
+        </button>
+        <input type="text" class="form-control" id="MultipleSelectionInputControl" placeholder="@Localizer["SelectBinPlaceholder"]" readonly />
+        <button class="btn btn-outline-primary" type="button" id="generateMultipleQRCode">@Localizer["GenerateQR"]</button>
+        <button class="btn btn-outline-danger" type="button" id="deleteMultipleBins">@CommonLocalizer["Delete"]</button>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Location", Model.Locations)
+
+@if (!string.IsNullOrWhiteSpace(SelectedLocation))
+{
+    <div class="border p-3 mt-3 mb-3 rounded shadow-sm bg-light">
+        <h5>
+            <button type="button" id="btnAddBinToggle"
+                    class="btn btn-link text-decoration-none p-0"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseAddBin"
+                    aria-expanded="false"
+                    aria-controls="collapseAddBin">
+                @Localizer["AddNewBin"]
+            </button>
+        </h5>
+        <div class="collapse" id="collapseAddBin">
+            <hr style="height:2px" />
+            <div class="mb-3">
+                <label for="BinName" class="form-label">@Localizer["BinName"]</label>
+                <input type="text" class="form-control" id="BinName" name="BinName" required />
+            </div>
+            <div class="mb-3">
+                <label for="addBinLocationID" class="form-label">@CommonLocalizer["Location"]</label>
+                <input type="hidden" id="addBinLocationID" name="addBinLocationID" value="@SelectedLocation" />
+                <input type="text" class="form-control" id="addBinLocationName" value="@Model.Locations!.SelectedLocationName" readonly />
+            </div>
+            <div class="mb-3">
+                <strong>@Localizer["Note"]: </strong>  <br />
+                <span class="badge bg-warning text-black fw-bold">;</span> &mdash; @Localizer["SeparateBinName"]<br />
+                <span class="badge bg-warning text-black fw-bold">[ A-Z ]</span> &mdash; @Localizer["BinNameRule"]<br />
+            </div>
+            <button type="button" id="btnNewBin" class="btn btn-success">@CommonLocalizer["Save"]</button>
+        </div>
+    </div>
+}
+
+@await Html.PartialAsync("_Search", Localizer["SearchBinName"].Value)
+
+<div class="container my-4" id="collectionContainer">
+    @if (!string.IsNullOrWhiteSpace(SelectedLocation) && Model.Bins?.Any() == true)
+    {
+        @await Html.PartialAsync("_CollectionBinMaster", Model)
+    }
+    else if (!string.IsNullOrWhiteSpace(SelectedLocation) && Model.Bins?.Any() == false)
+    {
+        <span class="text-muted d-flex justify-content-center pt-3 alert alert-info">@CommonLocalizer["NoItem"]</span>
+    }
+</div>
+
+<div id="barcodeModal" class="modal fade" tabindex="-1" aria-labelledby="barcodeModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header position-relative">
+                <h5 class="modal-title w-100 text-center" id="barcodeModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body d-flex flex-wrap justify-content-center" id="barcodeModalBody">
+            </div>
+            <div class="modal-footer flex-column align-items-stretch" id="barcodeModalFooter">
+                <div class="row g-3 w-100 align-items-center mb-2">
+                    <div class="col-12 col-md-auto d-flex align-items-center flex-wrap gap-2">
+                        <label for="qrCodeSize" class="fw-semibold mb-0">@Localizer["BarcodeSize"]</label>
+                            <div class="d-flex align-items-center gap-1">
+                            <input type="number" id="qrCodeSize" value="30" class="form-control form-control-sm" style="max-width: 70px;" />
+                        <span>mm</span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-auto d-flex align-items-center flex-wrap gap-2 qr-code-spacing">
+                        <label for="qrCodeSpacing" class="fw-semibold mb-0">@Localizer["BarcodeSpacing"]</label>
+                            <div class="d-flex align-items-center gap-1">
+                            <input type="number" id="qrCodeSpacing" value="20" class="form-control form-control-sm" style="max-width: 70px;" />
+                            <span>mm</span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-auto d-flex flex-wrap align-items-center gap-2">
+                        <select id="paperSize" class="form-select form-select-sm ms-3" style="width: auto;">
+                            <option value="a4" selected>A4</option>
+                            <option value="a5">A5</option>
+                            <option value="a6">A6</option>
+                            <option value="letter">Letter</option>
+                            <option value="legal">Legal</option>
+                        </select>
+                        <select id="paperOrientation" class="form-select form-select-sm ms-3" style="width: auto;">
+                            <option value="portrait" selected>@Localizer["Portrait"]</option>
+                            <option value="landscape">@Localizer["Landscape"]</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end align-items-end gap-2 mt-3">
+                    <button class="btn btn-success" id="downloadPdfBtn">@Localizer["GeneratePDF"]</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">@CommonLocalizer["Close"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var AddBinUrl = '@Url.Action("AddBin", "InventoryBin")'
+        var ChangeBinNameUrl = '@Url.Action("ChangeBinNameUrl", "InventoryBin")'
+        var SearchBinMasterUrl = '@Url.Action("SearchBinMaster", "InventoryBin")'
+        var DeleteBinUrl = '@Url.Action("DeleteBin", "InventoryBin")'
+        
+        // Localized strings for JavaScript
+        window.LocalizedStrings = {
+            location: '@CommonLocalizer["Location"]',
+            pleaseChooseLocation: '@Localizer["ChooseLocation"]',
+            binNameCannotBeEmpty: '@Localizer["BinNameCannotBeEmpty"]',
+            binNameError: '@Localizer["BinNameError"]',
+            binNameTooLong: '@Localizer["BinNameTooLong"]',
+            processing: '@Localizer["Processing"]',
+            pleaseWait: '@Localizer["PleaseWait"]',
+            binCreated: '@Localizer["BinCreated"]',
+            binCreatedSuccessfully: '@Localizer["BinCreatedSuccessfully"]',
+            alreadyExist: '@Localizer["AlreadyExist"]',
+            binExist: '@Localizer["BinExist"]',
+            errorCreatingBin: '@Localizer["ErrorCreatingBin"]',
+            errorOccurredCreatingBin: '@Localizer["ErrorOccurredCreatingBin"]',
+            invalidSize: '@Localizer["InvalidSize"]',
+            pleaseEnterValidNumber: '@Localizer["PleaseEnterValidNumber"]',
+            rejectedBin: '@Localizer["RejectedBin"]',
+            reason: '@Localizer["Reason"]',
+            exceedsTenCharacters: '@Localizer["ExceedsTenCharacters"]',
+            binNameSame: '@Localizer["BinNameSame"]',
+            binNameSameAsPreviously: '@Localizer["BinNameSameAsPreviously"]',
+            binNameMustStartAlphabet: '@Localizer["BinNameMustStartAlphabet"]',
+            failedRenameBin: '@Localizer["FailedRenameBin"]',
+            selectAll: '@Localizer["SelectAll"]',
+            deselectAll: '@Localizer["DeselectAll"]',
+            multipleQRCode: '@Localizer["MultipleQRCode"]',
+            searching: '@Localizer["Searching"]',
+            found: '@Localizer["Found"]',
+            binMatching: '@Localizer["BinMatching"]',
+            showing: '@Localizer["Showing"]',
+            bins: '@Localizer["Bins"]',
+            errorOccurredSearching: '@Localizer["ErrorOccurredSearching"]',
+            noBinsSelected: '@Localizer["NoBinsSelected"]',
+            pleaseSelectBins: '@Localizer["PleaseSelectBins"]',
+            confirmDelete: '@Localizer["ConfirmDelete"]',
+            confirmDeleteMessage: '@Localizer["ConfirmDeleteMessage"]',
+            deleteBin: '@Localizer["DeleteBin"]',
+            binDeleted: '@Localizer["BinDeleted"]',
+            binsDeletedSuccessfully: '@Localizer["BinsDeletedSuccessfully"]',
+            errorDeletingBin: '@Localizer["ErrorDeletingBin"]',
+            errorOccurredDeletingBin: '@Localizer["ErrorOccurredDeletingBin"]',
+            delete: '@CommonLocalizer["Delete"]',
+            yes: '@CommonLocalizer["Yes"]',
+            no: '@CommonLocalizer["No"]'
+        };
+    </script>
+    <script src="@Url.Content("~/lib/qrcode/v1.0.0/qrcode.min.js")"></script>
+    <script src="@Url.Content("~/lib/jspdf/v2.5.1/jspdf.umd.min.js")"></script>
+    <script src="@Url.Content("~/js/Pages/BinMaster.js")"></script>
+}

@@ -1,0 +1,191 @@
+﻿@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    ViewData["Title"] = CommonLocalizer["Dispensing"];
+    var locations = (ViewData["Locations"] as List<Location>)?.OrderBy(a => a.LocationName);
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger text-center alert-viewbag-error" role="alert">
+        @ViewBag.Error
+    </div>
+}
+
+<input type="hidden" id="codescan" />
+
+<div class="mb-4 p-3 bg-light rounded-3 shadow-sm border border-primary-subtle">
+    <div class="row align-items-center g-2">
+        <div class="col-auto">
+            <h6 class="mb-0 text-primary fw-semibold d-flex align-items-center">
+                <i class="bi bi-geo-alt-fill me-2"></i> @CommonLocalizer["Location"]
+            </h6>
+        </div>
+        <div class="col">
+            <select id="LocationSelect" class="form-select form-select-md border-primary shadow-sm py-2 px-3 rounded-3 fw-medium fs-6" data-placeholder="@CommonLocalizer["-- Select Location --"]">
+                <option value="" selected disabled>@CommonLocalizer["-- Select Location --"]</option>
+                @if (locations != null && locations.Any())
+                {
+                    @foreach (var loc in locations)
+                    {
+                        <option value="@loc.LocationID">@loc.LocationName</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Search Container -->
+<div id="transactionNoInput" class="mt-3">
+    <div class="input-group">
+        <input type="text" class="form-control" id="transactionNoField"
+               placeholder="@Localizer["PleaseEnterTransactionNo"]" />
+        <button type="submit" class="btn btn-primary" id="searchTransactionBtn">
+            <i class="bi bi-search"></i> @CommonLocalizer["Search"]
+        </button>
+    </div>
+</div>
+
+<div class="container my-4">
+    @* <h2 class="text-center mb-4">Smart Dispensing Scanner</h2> *@
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-4">
+            <!-- Container 1: Camera & Scan -->
+            @if(Env.IsDevelopment())
+            {
+                <button id="btnTryFetch" class="btn btn-success mt-3 mb-3" onclick="CheckScannedData('RSO/251201-0001')">Fetch Data 1</button>
+                <button id="btnTryFetch2" class="btn btn-success mt-3 mb-3" onclick="CheckScannedData('RSO/240627-0068')">Fetch Data 2</button>
+                <button id="btnTryFetch3" class="btn btn-success mt-3 mb-3" onclick="CheckScannedData('RSO/999999-9999')">Fetch Data 3</button>
+                <button id="btnTryFetch4" class="btn btn-success mt-3 mb-3" onclick="CheckScannedData('RSO/251202-0001')">Fetch Data 4</button>
+                <button id="btnTryFetch4" class="btn btn-success mt-3 mb-3" onclick="CheckScannedData('RSI/251223-0001')">Fetch Data 5</button>
+             }            
+
+            <!-- Floating Button Trigger -->
+            <div id="camera-float-button" class="camera-draggable shadow rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                 style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; z-index: 1065; cursor: grab;"
+                 onclick="OpenCloseCamera()">
+                📷
+            </div>
+
+            <!-- Camera Container -->
+            <div id="qr-reader-container" class="camera-draggable shadow p-2 bg-light rounded"
+                 style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                width: 90%; max-width: 500px; z-index: 1060; display: none;">
+                <div id="qr-reader" style="width: 100%; min-height: 50px"></div>
+            </div>
+
+            <!-- Container 2: Scanned Barcodes -->
+            <div class="card border-info shadow-sm mt-3">
+                <div class="card-header bg-info text-white">
+                    Scanned Barcodes
+                </div>
+                @await Html.PartialAsync("_ScannedList")
+            </div>
+        </div>
+
+        <!-- Container 2: Scanned Barcodes -->
+        @* <div class="col-12 col-lg-4">
+            <div class="card border-info shadow-sm">
+                <div class="card-header bg-info text-white">
+                    Scanned Barcodes
+                </div>
+                @await Html.PartialAsync("_ScannedList")
+            </div>
+        </div> *@
+
+        <!-- Container 3 & Container 4: Detail Info -->
+        <div class="col-12 col-lg-8" id="selectedDetail">
+            @await Html.PartialAsync("_ScannedDetail")
+        </div>
+
+        <!-- Modal Change Balance Detail -->
+        <div id="modal-container">
+        </div>
+    </div>
+</div>
+@section Styles {
+    <style>
+        .barcode-item.active::before {
+            content: "→ ";
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+        .selectbin.active::before {
+            background: linear-gradient(90deg, #e9f2ff, white);
+            border-left: 4px solid #0d6efd;
+            color: #0d6efd;
+        }
+
+        .selectbin.active i {
+            color: yellow !important;
+        }
+
+        #qr-reader-container {
+            max-width: 100%;
+            border: 1px solid #ccc;
+            aspect-ratio: auto;
+            max-height: 100%;
+            overflow: auto;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 0 0 transparent;
+        }
+
+            .btn-gradient:hover:not(:disabled) {
+                opacity: 1;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-gradient:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+        #LocationSelect:hover {
+            box-shadow: 0 0 6px rgba(13, 110, 253, 0.4);
+            transition: box-shadow 0.2s ease-in-out;
+        }
+
+        @@media (max-width: 768px) {
+            #qr-reader-container {
+                aspect-ratio: auto;
+            }
+
+            .card-body {
+                overflow-y: auto;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        var CheckScannedDataUrl = '@Url.Action("CheckScannedData", "Dispensing")';
+        var DetailTransactionUrl = '@Url.Action("DetailTransaction", "Dispensing")';
+        var GetBinListUrl = '@Url.Action("GetBinList", "Dispensing")';
+        var SaveChangedUrl = '@Url.Action("SaveChanged", "Dispensing")';
+    </script>
+    <script src="@Url.Content("~/js/Pages/Dispensing.js")"></script>
+    <script src="@Url.Content("~/lib/html5-qrcode-master/html5-qrcode.min.js")"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    @* <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btn1 = document.getElementById("btnTryFetch");
+            const btn2 = document.getElementById("btnTryFetch2");
+            const btn3 = document.getElementById("btnTryFetch3");
+            const btn4 = document.getElementById("btnTryFetch4");
+            btn1.click();
+            setTimeout(() => btn2.click(), 5000);
+            setTimeout(() => btn3.click(), 10000);
+            setTimeout(() => btn4.click(), 15000);
+        });
+    </script> *@
+}

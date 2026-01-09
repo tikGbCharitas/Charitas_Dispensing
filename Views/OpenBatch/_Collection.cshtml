@@ -1,0 +1,134 @@
+﻿@model OpenBatchViewModel
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+}
+
+@if (Model.ItemDetail.Any())
+{
+    @foreach (var batch in Model.ItemDetail)
+    {
+        var cardClass = batch.BinQty > 0 && batch.isOpen == false ? "card h-100 shadow-sm bg-danger text-white card-lock" : (batch.isOpen == false ? "card h-100 shadow-sm bg-light" : "card h-100 shadow-sm bg-primary text-white");
+            
+        //For TransactionNo
+        var maxQty = batch.SRUnit == batch.SRItemUnit
+                        ? (batch.Balance ?? 0)
+                        : ((batch.Balance ?? 0) * (batch.ConvertionFactor ?? 0));
+        <div class="col">
+            <div class="@cardClass">
+                <div class="card-body card-clickable" data-is-open="@batch.isOpen.ToString().ToLower()" data-is-modified="false" data-cf="@batch.ConvertionFactor?.ToString(CultureInfo.InvariantCulture)"
+                        data-item-id="@batch.ItemID" data-nie-bpom="@batch.NIE_BPOM" data-batch-id="@batch.BatchID" data-expired-date="@batch.ExpiredDate"
+                        data-balance="@batch.Balance?.ToString(CultureInfo.InvariantCulture)" data-barcode="@(batch.Barcode?.Length >= 40 ? batch.Barcode.Substring(0, 40) : batch.Barcode)">
+                    <h5 class="card-title fw-bold">@Html.HighlightSearch(batch.ItemName)</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>🆔 ItemID:</strong> @Html.HighlightSearch(batch.ItemID)</li>
+                        <li><strong>🆔📊 Item Total:</strong> @Model.ItemDetail.Where(a => a.ItemID == batch.ItemID).Sum(a => a.Balance ?? 0).ToString(CultureInfo.InvariantCulture)</li>
+                        <li><strong>🔖 NIE BPOM:</strong> @Html.HighlightSearch(batch.NIE_BPOM)</li>
+                        <li><strong>📦 Batch:</strong> @Html.HighlightSearch(batch.BatchID)</li>
+                        <li><strong>📅 Expired:</strong> @(Html.HighlightSearch(batch.ExpiredDate))</li>
+                        @if (Model.SelectionType == "Location")
+                        {
+                            <li><strong>📊 Balance:</strong> @(batch.Balance?.ToString(CultureInfo.InvariantCulture))</li>
+                        }
+                        else
+                        {
+                            <li><strong>📊 Qty:</strong> @(batch.Balance?.ToString(CultureInfo.InvariantCulture)) (@(batch.SRUnit))</li>
+                            <li><strong>📊 Qty (Max):</strong> <span class="TransNoQtyMax">@(maxQty.ToString("F2", CultureInfo.InvariantCulture))</span> (@(batch.SRItemUnit))</li>
+                        }
+                        @if (ViewBag.Mode == AppEnum.DataMode.Edit && Model.SelectionType == "Location")
+                        {
+                            <li><strong>🗄️ Bin:</strong> @(batch.BinQty.ToString(CultureInfo.InvariantCulture))</li>
+                        }
+                        else if (ViewBag.Mode == AppEnum.DataMode.View && Model.SelectionType == "Location")
+                        {
+                            <li>
+                                <strong>🗄️ Bin:</strong> @(batch.BinQty.ToString(CultureInfo.InvariantCulture))
+                                @if (!string.IsNullOrWhiteSpace(batch.BinName))
+                                {
+                                    @:[@Html.HighlightSearch(batch.BinName)]
+                                }
+                            </li>
+                        }
+                        <li><strong>Barcode:</strong> @batch.Barcode</li>
+                    </ul>
+
+                    @if (ViewBag.Mode == AppEnum.DataMode.Edit)
+                    {
+                        <div class="mt-3">
+                            <label class="form-label @(batch.isOpen ? "text-white" : "text-black") ">Bin Location:</label>
+                            <select class="form-select form-select-sm bin-select" name="BinTarget" 
+                                    id="binSelect-@batch.ItemID-@batch.NIE_BPOM-@batch.BatchID"
+                                    data-placeholder="@CommonLocalizer["-- Select Bin --"]"
+                                    @(!batch.isOpen || (batch.BinID != null && batch.BinID > 0) ? "disabled" : "") >
+                                <option value="">@CommonLocalizer["-- Select Bin --"]</option>
+                                @if (Model.ItemBin != null && Model.ItemBin.Any())
+                                {
+                                    foreach (var bin in Model.ItemBin)
+                                    {
+                                        @if (bin.BinID == batch.BinID)
+                                        {
+                                            <option value="@bin.BinID" selected>@bin.BinName</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@bin.BinID">@bin.BinName</option>
+                                        }
+                                    }
+                                }
+                            </select>
+
+                            @if(Model.SelectionType == "TransactionNo" && ViewBag.Mode == AppEnum.DataMode.Edit)
+                            {
+                                <div class="ms-3 mt-2">
+                                    <label><strong>🗄️ Bin:</strong> @(batch.BinQty.ToString(CultureInfo.InvariantCulture))</label>
+                                </div>
+                            }
+
+                            <label class="form-label mt-2 @(batch.isOpen ? "text-white" : "text-black")">Qty:</label>
+                            @if (Model.SelectionType == "Location")
+                            {
+                                <input type="number" id="input-@batch.ItemID-@batch.NIE_BPOM-@batch.BatchID" class="form-control form-control-sm" inputmode="numeric"
+                                        max="@(Math.Max(0, (batch.Balance ?? 0) - (batch.BinQty)))" onchange="MaxQty(this)"
+                                min="0" @(batch.isOpen ? "" : "disabled") />
+                            }
+                            else
+                            {
+                                <input type="number" id="input-@batch.ItemID-@batch.NIE_BPOM-@batch.BatchID" class="form-control form-control-sm" inputmode="numeric"
+                                        max="@(Math.Max(0, maxQty).ToString(CultureInfo.InvariantCulture))" onchange="MaxQty(this)"
+                                        min="0" @(batch.isOpen ? "" : "disabled") />
+                            }
+                        </div>
+
+                        if (batch.BinQty <= 0 || batch.isOpen)
+                        {
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-success btn-sm mt-3"
+                                        id="btnAdd-@batch.ItemID-@batch.NIE_BPOM-@batch.BatchID"
+                                        onclick="AddReduceCF(this, 'add', @batch.ConvertionFactor)"
+                                        @(batch.isOpen ? "" : "disabled")>
+                                    + (CF)
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm mt-3"
+                                        id="btnReduce-@batch.ItemID-@batch.NIE_BPOM-@batch.BatchID"
+                                        onclick="AddReduceCF(this, 'reduce', @batch.ConvertionFactor)"
+                                        @(batch.isOpen ? "" : "disabled")>
+                                    - (CF)
+                                </button>
+                            </div>
+
+                            <small class="d-block text-end pt-2 @(batch.isOpen ? "text-white" : "text-black")">CF: @batch.ConvertionFactor</small>
+                        }                            
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="w-100">
+        <div class="alert alert-info text-center">
+            @CommonLocalizer["NoItem"]
+        </div>
+    </div>
+}

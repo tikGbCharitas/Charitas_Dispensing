@@ -1,0 +1,47 @@
+﻿@model string
+
+<div class="mb-4">
+    <div class="input-group">
+        <!-- 🔎 Search text -->
+        <input type="text" class="form-control" id="searchComponent" name="searchQuery" placeholder="@Model" autocomplete="off" />
+        <button type="button" class="btn btn-primary" id="searchButton">
+            <i class="bi bi-search"></i> Search
+        </button>
+        <div class="dropdown-menu p-3" style="min-width: 220px;">
+            @* <label class="form-check">
+                <input class="form-check-input filter-checkbox" type="checkbox" value="BinName" checked>
+                <span class="form-check-label">Bin Name</span>
+            </label>
+            <label class="form-check mt-1">
+                <input class="form-check-input filter-checkbox" type="checkbox" value="Barcode" checked>
+                <span class="form-check-label">Barcode</span>
+            </label>
+            <label class="form-check mt-1">
+                <input class="form-check-input filter-checkbox" type="checkbox" value="ItemID" checked>
+                <span class="form-check-label">Item ID</span>
+            </label>
+            <label class="form-check mt-1">
+                <input class="form-check-input filter-checkbox" type="checkbox" value="ItemName" checked>
+                <span class="form-check-label">Item Name</span>
+            </label>
+            <label class="form-check mt-1">
+                <input class="form-check-input filter-checkbox" type="checkbox" value="BPOM" checked>
+                <span class="form-check-label">BPOM</span>
+            </label>
+            <label class="form-check mt-1">
+                <input class="form-check-input filter-checkbox" type="checkbox" value="Batch" checked>
+                <span class="form-check-label">Batch</span>
+            </label>
+            <hr class="my-2">
+            <button type="button" class="btn btn-sm btn-primary w-100" id="applyFiltersBtn">Apply Filter</button> *@
+            <button type="button" class="btn btn-outline-secondary" id="clearSearchButton" style="display: none;">
+                <i class="bi bi-x-circle"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Search result count -->
+    <div id="searchResultInfo" class="mt-2 text-muted small">
+        <i class="bi bi-info-circle"></i> <span id="searchResultCount"></span>
+    </div>
+</div>

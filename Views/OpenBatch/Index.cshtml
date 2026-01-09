@@ -1,0 +1,181 @@
+﻿@model OpenBatchViewModel
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+    var searchUrl = Url.Action("Search");
+    ViewData["Title"] = CommonLocalizer["OpenBatch"];
+    ViewData["Camera"] = true;
+}
+
+@section Styles {
+    <link href="@Url.Content("~/css/Pages/OpenBatch.css")" rel="stylesheet" />
+}
+
+<input type="hidden" id="codescan" />
+
+<div class="text-center mb-4">
+    <h2 class="d-inline-block border-bottom border-3 border-primary pb-2">
+        <i class="bi bi-box-seam"></i> @CommonLocalizer["OpenBatch"]
+    </h2>
+</div>
+
+<div class="mb-3">
+    @if(ViewBag.Mode == AppEnum.DataMode.Edit)
+    {
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body bg-light">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-primary me-3 fs-4"></i>
+                    <div>
+                        @if (Model.SelectionType == "Location")
+                        {
+                            <span class="badge bg-primary rounded-pill px-3 py-2">
+                                <i class="bi bi-list-ul me-1"></i> @CommonLocalizer["Location"]
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded-pill px-3 py-2"
+                                  style="background-color:#e7f1ff; color:#0d6efd; border: 1px solid #b6d7ff; font-size:1rem;">
+                                <i class="bi bi-receipt me-1"></i>
+                                @CommonLocalizer["TransactionNo"]: <strong>@ViewBag.TransactionNo</strong>
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (Model.SelectionType == "TransactionNo")
+        {
+            <div class="mt-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body bg-light">
+                        <div class="d-flex align-items-center">
+                            <h6 class="text-primary fw-semibold me-2 mb-0">
+                                <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                                @CommonLocalizer["Location"]:
+                            </h6>
+                            @* <strong>@Model.Locations?.SelectedLocationName</strong> *@
+                            <span class="badge bg-primary text-white fs-6 text-wrap">
+                                <i class="bi bi-pin-map-fill"></i> @Model.Locations?.SelectedLocationName
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <input type="hidden" name="SelectionType" value="@Model.SelectionType" />
+        <input type="hidden" name="TransactionNo" value="@ViewBag.TransactionNo" />
+        <input type="hidden" name="LocID" value="@Model.Locations?.SelectedLocationID" />
+    }
+    else
+    {
+        <form method="get" asp-action="Index" id="selectionTypeForm">
+            <input type="hidden" name="LocID" id="hiddenLocID" value="@Model.Locations?.SelectedLocationID" />
+
+            <div class="btn-group" role="group" aria-label="Selection Type">
+                <input type="radio" class="btn-check radio-selection" name="SelectionType" id="radioLocation" value="Location"
+                       @(Model.SelectionType == "Location" || string.IsNullOrEmpty(Model.SelectionType) ? "checked" : "") />
+                <label class="btn btn-outline-primary" for="radioLocation">
+                    <i class="bi bi-list-ul"></i> @CommonLocalizer["Location"]
+                </label>
+
+                <input type="radio" class="btn-check radio-selection" name="SelectionType" id="radioTransactionNo" value="TransactionNo"
+                       @(Model.SelectionType == "TransactionNo" ? "checked" : "") />
+                <label class="btn btn-outline-primary" for="radioTransactionNo">
+                    <i class="bi bi-receipt"></i> @CommonLocalizer["TransactionNo"]
+                </label>
+            </div>
+
+            <div id="transactionNoInput" class="mt-3" style="display: @(Model.SelectionType == "TransactionNo" ? "block" : "none")">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="TransactionNo" id="transactionNoField"
+                           placeholder="@Localizer["PleaseEnterTransactionNo"]"
+                           value="@ViewBag.TransactionNo" />
+                    <button type="submit" class="btn btn-primary" id="searchTransactionBtn">
+                        <i class="bi bi-search"></i> @CommonLocalizer["Search"]
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body bg-light">
+                            <div class="d-flex align-items-center">
+                                <h6 class="text-primary fw-semibold me-2 mb-0">
+                                    <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                                    @CommonLocalizer["Location"]:
+                                </h6>
+                                <strong id="LocTransNo">@Model.Locations?.SelectedLocationName</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+<input type="hidden" name="isTransactionProceed" value="@Model.isTransactionProceed.ToString().ToLower()" />
+
+<div id="locationSection" style="display: @(Model.SelectionType == "Location" || string.IsNullOrEmpty(Model.SelectionType) ? "block" : "none")">
+    @await Html.PartialAsync("_Location", Model.Locations)
+</div>
+
+<div class="container">
+    <div class="alert alert-info shadow-sm batch-note-alert" style="border-left: 4px solid #17a2b8;">
+        <h6 class="mb-3"><i class="bi bi-info-circle-fill"></i> <strong>@CommonLocalizer["Note"]:</strong></h6>
+        <div class="row g-2">
+            @if(ViewBag.Mode == AppEnum.DataMode.Edit)
+            {
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <span class="batch-status-indicator selected"></span>
+                        <span class="badge bg-warning text-dark border border-secondary">
+                            <i class="bi bi-check-circle"></i> @Localizer["Selected"]
+                        </span>
+                        <span class="ms-2">@Localizer["SelectedBatch"]</span>
+                    </div>
+            }
+            <div class="col-12 col-md-6 col-lg-3">
+                <span class="batch-status-indicator open"></span>
+                <span class="badge bg-primary">
+                    <i class="bi bi-unlock-fill"></i> @Localizer["Opened"]
+                </span>
+                <span class="ms-2">@Localizer["BatchIsOpen"]</span>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <span class="batch-status-indicator locked"></span>
+                <span class="badge bg-danger">
+                    <i class="bi bi-lock-fill"></i> @Localizer["Locked"]
+                </span>
+                <span class="ms-2">@Localizer["BatchIsLock"]</span>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <span class="badge bg-light text-dark border border-secondary">
+                    <i class="bi bi-plus-circle"></i> @Localizer["New"]
+                </span>
+                <span class="ms-2">@Localizer["NewBatch"]</span>
+            </div>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_Search", "🔍 Search Item Name, Item ID, Batch, BPOM...")
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="collectionContainer">
+        @if ((!string.IsNullOrWhiteSpace(Model.Locations?.SelectedLocationID) || Model.SelectionType == "TransactionNo") && Model.ItemDetail != null)
+        {
+            @await Html.PartialAsync("_Collection")
+        }
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        //const originalData = JSON.parse('@Html.Raw(JsonSerializer.Serialize(Model))');
+        const originalData = @Html.Raw(JsonSerializer.Serialize(Model.ItemDetail ?? new List<ItemDetailViewModel>()));
+        const ViewMode = @JsonSerializer.Serialize(ViewBag.Mode == AppEnum.DataMode.View).ToLower();
+        const ItemBinList = @Html.Raw(JsonSerializer.Serialize(Model.ItemBin ?? new List<BinViewModel>()));
+        const SearchItemsUrl = '@Url.Action("SearchItems")';
+        let searchPrev = @Html.Raw(JsonSerializer.Serialize(!string.IsNullOrWhiteSpace(ViewBag.Search?.ToString()) ? ViewBag.Search.ToString() : ""));
+    </script>
+    <script src="@Url.Content("~/js/Pages/OpenBatch.js")"></script>
+}

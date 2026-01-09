@@ -1,0 +1,32 @@
+﻿@model InventoryBinViewModel.BinMasterViewModel
+@inject IStringLocalizerFactory Factory
+
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+}
+
+@if (Model.Bins?.Any() == true)
+{
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+        @foreach (var bin in Model.Bins)
+        {
+            <div class="col">
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex align-items-center justify-content-between" data-bin-id="@bin.BinID" data-bin-name="@bin.BinName">
+                        <div class="d-flex align-items-center flex-grow-1 me-2">
+                            <button class="btn btn-sm btn-danger delete-btn d-none me-2">@CommonLocalizer["Delete"]</button>
+                            <input type="checkbox" class="form-check-input me-2 bin-checkbox" />
+                            <input type="text" class="form-control me-2 bin-name-input" value="@bin.BinName" readonly />
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-sm btn-primary barcode-btn me-2" data-bs-toogle="modal" data-bs-target="#barcodeModal">@CommonLocalizer["Barcode"]</button>
+                            <button class="btn btn-sm btn-warning edit-btn">@CommonLocalizer["Edit"]</button>
+                            <button class="btn btn-sm btn-success save-btn d-none me-2">@CommonLocalizer["Save"]</button>
+                            <button class="btn btn-sm btn-secondary cancel-btn d-none">@CommonLocalizer["Cancel"]</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,256 @@
+﻿@model DispensingViewModel.DispensingDetailViewModel
+
+<div class="row g-3">
+    <!-- Container 3: Patient Detail -->
+    <div class="col-12 col-lg-6">
+        <div class="card border-success shadow-sm">
+            <div class="card-header bg-success text-white">
+                Patient Detail
+            </div>
+            <div class="card-body" id="patientDetail">
+                @if (Model == null)
+                {
+                    <div class="text-muted text-center">Select a Prescription to view details</div>
+                }
+                else
+                {
+                    <div>
+                        <strong>Medical No: </strong>@Model.MedicalNo<br>
+                        <strong>Patient: </strong>@Model.Patient<br>
+                        <div class="row">
+                            <div class="col-12 col-sm-4 col-md-6">
+                                <strong>Sex: </strong>@(Model.Sex == "M" ? "Male" : Model.Sex == "F" ? "Female" : "") <br />
+                                <strong>Height: </strong>@(string.IsNullOrWhiteSpace(Model.Height) ? "-" : Model.Height + " cm")
+                            </div>
+                            <div class="col-12 col-sm-4 col-md-6">
+                                <strong>Age: </strong>@Model.Age<br>
+                                <strong>Weight: </strong>@(string.IsNullOrWhiteSpace(Model.Weight) ? "-" : Model.Weight + " kg")
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Container 4: Prescription Detail -->
+    <div class="col-12 col-lg-6">
+        <div class="card border-primary shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Prescription Detail
+            </div>
+            <div class="card-body" id="prescriptionDetail">
+                @if (Model == null)
+                {
+                    <div class="text-muted text-center">Select a Prescription to view details</div>
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(Model.RegistrationNo))
+                    {
+                        <div class="alert alert-warning border-0 shadow-sm text-center mb-4" role="alert">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                                <span class="fw-semibold">RegistrationNo not found</span>
+                            </div>
+                        </div>
+                    }
+                    else if (!Model.Approved)
+                    {
+                        <div class="alert alert-info border-0 shadow-sm text-center mb-4" role="alert">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="bi bi-hourglass-split fs-4 me-2"></i>
+                                <span class="fw-semibold">Prescription is waiting for approval</span>
+                            </div>
+                        </div>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(Model.DeliverDateTime))
+                    {
+                        <div class="alert alert-success border-0 shadow-sm text-center mb-4" role="alert">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-check-circle-fill fs-3 me-2"></i>
+                                    <span class="fw-semibold fs-5">Prescription has been delivered</span>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    Delivered on: @Model.DeliverDateTime
+                                </small>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.ItemGroupsDatas == null || !Model.ItemGroupsDatas.Any())
+                    {
+                        <div class="alert alert-danger border-0 shadow-sm text-center mb-4" role="alert">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="bi bi-x-circle-fill fs-4 me-2"></i>
+                                <span class="fw-semibold">Error fetching prescription data</span>
+                            </div>
+                            <small class="d-block mt-2 text-muted">Please try scanning again or contact support</small>
+                        </div>
+                    }
+                    else if (Model.ItemGroupsDatas.Any(s => s.ItemQtyReq > 0))
+                    {
+                        <div class="alert alert-warning text-center mb-4" role="alert">
+                            ⚠️ Balance not Enough
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <span class="badge bg-danger fs-6 px-3 py-2 shadow-sm">
+                                Prescription Reject
+                            </span>
+                        </div>
+
+                        <div class="list-group">
+                            @foreach (var item in Model.ItemGroupsDatas.Where(x => x.ItemQtyReq > 0))
+                            {
+                                var available = item.ItemDetailDatas?.Sum(a => a.Quantity) ?? 0;
+                                var insufficient = item.ItemQtyReq > 0;
+
+                                <div class="list-group-item">
+                                    <h5 class="mb-0 @(insufficient ? "text-danger" : "text-muted")">
+                                        @item.ItemName (@item.ItemID)
+                                    </h5>
+
+                                    @if (insufficient)
+                                    {
+                                        <div class="text-end">
+                                            <div class="mb-1">
+                                                <strong>Balance (available):</strong>
+                                                <span class="text-secondary">@available.ToString(CultureInfo.InvariantCulture)</span>
+                                            </div>
+                                            <div>
+                                                <strong>Qty (Req):</strong>
+                                                <span class="text-dark fw-bold">@item.ItemQtyReq</span>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="mt-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <strong>Qty (Req):</strong>
+                                                <span class="text-dark fw-bold">@available</span>
+                                            </div>
+                                            <span class="badge bg-success">OK</span>
+                                        </div>
+                                    }
+                                    @* <p class="mb-1">
+                                        <strong>Balance (available):</strong>
+                                        <span class="text-secondary">
+                                            @item.ItemDetailDatas.Sum(a => a.Quantity)
+                                        </span>
+                                    </p>
+
+                                    <p class="mb-0">
+                                        <strong>Qty (Req):</strong>
+                                        <span class="text-dark fw-bold">
+                                            @item.ItemQtyReq
+                                        </span>
+                                    </p> *@
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-2">
+                            <strong>Prescription:</strong> <span id="PrescriptionNo">@Model.PrescriptionNo</span><br>
+                            <strong>Registration:</strong> <span id="Registration">@Model.RegistrationNo</span><br>
+                        </div>
+                        <ul class="list-group">
+                            @foreach (var item in Model.ItemGroupsDatas)
+                            {
+                                <li class="list-group-item flex-column align-items-start" id="card-@item.ItemID" data-max="@((item.ItemDetailDatas.Sum(x => x.Quantity ?? 0) + item.ItemQtyReq)?.ToString(CultureInfo.InvariantCulture))">
+                                    <div class="d-flex w-100 justify-content-between align-items-center flex-wrap">
+                                        <div class="me-auto">
+                                            <h5 class="mb-1" style="color: #b33c00">
+                                                @item.ItemName (@item.ItemID)
+                                            </h5>
+                                            <hr class=" mx-auto my-2" />
+                                            <div class="@item.ItemID-list-detail">
+                                                @* @await Html.PartialAsync("_NewBalanceDetail", item.ItemDetailDatas) *@
+                                                @if(item.QtyNonCE != null && item.QtyNonCE != 0)
+                                                {
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <strong class="me-3">Quantity: </strong> @item.QtyNonCE?.ToString(CultureInfo.InvariantCulture)
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    @foreach (var detail in item.ItemDetailDatas)
+                                                    {
+                                                        @* DateTime parsedDate;
+                                                                string formatted = DateTime.TryParse(detail.ExpiredDate, out parsedDate)
+                                                                ? parsedDate.ToString("yyyy-MM-dd")
+                                                                : detail.ExpiredDate; *@
+
+                                                        <div class="detailEDBatch" data-bin-id="@detail.BinID" data-bin-name="@detail.BinName" data-bpom="@detail.NIE_BPOM" data-batch="@detail.Batch"
+                                                             data-ed="@detail.ExpiredDate" data-qty="@detail.Quantity?.ToString(CultureInfo.InvariantCulture)">
+                                                            <div><strong>Bin Name:</strong> @detail.BinName</div>
+                                                            <div><strong>NIE BPOM:</strong> @detail.NIE_BPOM</div>
+                                                            <div><strong>Batch:</strong> @detail.Batch</div>
+                                                            <div>
+                                                                <strong>Expired Date:</strong>
+                                                                @detail.ExpiredDate
+                                                            </div>
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <strong class="me-3">Quantity: </strong> @detail.Quantity?.ToString(CultureInfo.InvariantCulture)
+                                                            </div>
+                                                            <hr class="w-50 mx-auto my-2" />
+                                                        </div>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if (item.QtyNonCE == null)
+                                    {
+                                        <div class="d-flex flex-column align-items-center">
+                                            <button class="btn btn-sm btn-outline-secondary mt-2" id="toggle-btn-@item.ItemID" title="Expand" data-prescription="@Model.PrescriptionNo" value="0"
+                                                    onclick="ChangeDetail(this, '@Model.PrescriptionNo', '@item.ItemID', '@item.ItemName')">
+                                                Change Detail
+                                            </button>
+                                        </div>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    <div class="d-flex justify-content-end mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="ClosePrescription('@Model.PrescriptionNo')">
+                            Close Prescription
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="template-addLine">
+    <div class="row g-2 align-items-center mb-1 " id="LINE_ID">
+        <div class="col-3">
+            <select class="form-select form-select-sm bin-select" data-itemid="ITEM_ID" onchange="ChangedBin(this)">
+                <option value=""></option>
+            </select>
+        </div>
+        <div class="col-4">
+            <select class="form-select form-select-sm detail-select" data-itemid="ITEM_ID" onchange="ChengeBPOM(this)">
+                <option value=""></option>
+            </select>
+        </div>
+        <div class="col-2">
+            <input type="number" class="form-control form-control-sm qty-max" value="0" readonly />
+        </div>
+        <div class="col-2">
+            <input type="number" class="form-control form-control-sm qty-input-editable" inputmode="numeric" min="0" value="0" max="0" data-prev-value="0" onchange="validateQty(this)" />
+        </div>
+        <div class="col-1">
+            <button class="btn btn-sm btn-outline-danger" onclick="removeLine(this)">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </div>
+        <hr class="w-75 mx-auto my-2" style="color:red; height: 3px" />
+    </div>
+</template>

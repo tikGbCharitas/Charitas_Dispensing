@@ -1,0 +1,219 @@
+﻿@model BinOpnameViewModel.PageDetail
+
+<div class="form-label me-3 my-3">
+    <strong>
+        @(Model.SortType == "item" ? "Page No: " : "Bin Name: ")
+    </strong>
+    <span id="lblSortID"> @Model.SortID </span>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+    @if (Model?.DetailList?.Any() == true)
+    {
+        @if (Model.SortType == "item")
+        {
+            foreach (var itemGroup in Model.DetailList.GroupBy(z => new { z.ItemID, z.ItemName }).OrderBy(a => a.Key.ItemName))
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm" id="@itemGroup.Key.ItemID">
+                        <div class="card-body bg-light">
+                            <h3 class="card-title text-primary fw-bold">@itemGroup.Key.ItemName</h3>
+                            <p class="badge bg-secondary">ID: <span id="cardItemID">@itemGroup.Key.ItemID</span></p>
+                            @foreach (var group in itemGroup.GroupBy(x => new { x.NIE_BPOM, x.BatchID, x.ExpiredDate, x.TotalQuantity, x.isOpen }))
+                            {
+                                @if (!string.IsNullOrEmpty(group.Key.NIE_BPOM))
+                                {
+                                    <div class="mb-3 px-3 edbatchlist" style="background-color: burlywood">
+                                        <ul class="list-unstyled small">
+                                            <li>🔖 <strong>NIE BPOM: </strong> <span class="NIE_BPOM">@group.Key.NIE_BPOM</span></li>
+                                            <li>📦 <strong>Batch: </strong> <span class="batch">@group.Key.BatchID</span></li>
+                                            <li>📅 <strong>Expired: </strong> <span class="expireddate">@group.Key.ExpiredDate?.ToString("yyyy-MM-dd")</span></li>
+                                        </ul>
+                                        <hr />
+                                        @foreach (var detail in group)
+                                        {
+                                            @if (!string.IsNullOrWhiteSpace(detail.BinName))
+                                            {
+                                                <div class="list-unstyled px-3 small binlist">
+                                                    <div class="binItem">
+                                                        <div>📍 <strong>Bin:</strong> <span class="binName">@detail.BinName</span></div>
+                                                        @if (ViewBag.Mode == AppEnum.DataMode.Edit || Model.DataMode == "Edit")
+                                                        {
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <span class="fw-bold mb-0">📊 Bin Qty:</span>
+                                                                <input type="number" min="0"
+                                                                       class="form-control form-control-sm w-25 qty-userinput binQty"
+                                                                       style="height: calc(1.5em + .5rem + 2px); min-width: 80px;"
+                                                                       value="@(detail.BinQty)" />
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div>📊 <strong>Bin Qty: </strong>@detail.BinQty?.ToString("F2")</div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                        @if ((ViewBag.Mode == AppEnum.DataMode.Edit || Model.DataMode == "Edit") && group.Key.isOpen)
+                                        {
+                                            <div class="text-center">
+                                                <button id="btnAddNewBIn" class="btn btn-success btn-sm my-2" data-transaction-no="@Model.TransactionNo" value="bin" data-item-id="@itemGroup.Key.ItemID">Add Bin</button>
+                                            </div>
+                                        }
+                                        @if (ViewBag.Mode == AppEnum.DataMode.Edit || Model.DataMode == "Edit")
+                                        {
+                                            <div class="d-flex align-items-center gap-3">
+                                                <p class="mb-0 fw-bold">In Box: </p>
+                                                <input type="number" class="form-control form-control-sm w-25 qty-userinput inBoxQuantity" min="0" value="@(group.Key.TotalQuantity - group.Sum(a => a.BinQty))" style=" height: calc(1.5em + .5rem + 2px); min-width: 80px;" />
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <p>
+                                                <strong> In Box: </strong>
+                                                @(group.Key.TotalQuantity - group.Sum(a => a.BinQty))
+                                            </p>
+                                        }
+                                        <p class="fw-bold text-end text-success">
+                                            Total: @group.Key.TotalQuantity
+                                        </p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @if (ViewBag.Mode == AppEnum.DataMode.Edit || Model.DataMode == "Edit")
+                                    {
+                                        <div class="d-flex justify-content-end align-items-center gap-2">
+                                            <p class="fw-bold text-success mb-0">Total:</p>
+                                            <input type="number" class="form-control form-control-sm w-25 qty-userinput totalQuantity" min="0" value="@group.Key.TotalQuantity" style="min-width: 80px;" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="fw-bold text-end text-success">
+                                            Total: @group.Key.TotalQuantity
+                                        </p>
+                                    }
+                                }
+                            }
+                            @if ((ViewBag.Mode == AppEnum.DataMode.Edit || Model.DataMode == "Edit") && Model.DetailList.Any(a => a.ItemID == itemGroup.Key.ItemID && a.isControlExpired == true))
+                            {
+                                <div class="text-end">
+                                    <button class="btn btn-primary btn-sm" id="btnAddNewEDBatch" value="edbatch" data-item-id="@itemGroup.Key.ItemID">Add</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            @* foreach(var itemGroup in Model.DetailList.GroupBy(x => new {x.BinID, x.BinName }))
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body bg-light">
+                        <h3 class="card-title text-primary fw-bold">@itemGroup.Key.BinName</h3>
+                        @foreach(var item in itemGroup.GroupBy(a => new{ a.ItemID, a.ItemName}).OrderBy(a => a.Key.ItemName))
+                        {
+                            foreach(var edbatch in item)
+                            {
+                                <ul class="list-unstyled small">
+                                    @if (string.IsNullOrWhiteSpace(edbatch.NIE_BPOM))
+                                    {
+                                        <p class="fw-bold text-end text-success">
+                                            Total: @edbatch.TotalQuantity
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        <li>🔖 <strong>NIE BPOM:</strong> @edbatch.NIE_BPOM</li>
+                                        <li>📦 <strong>Batch:</strong> @edbatch.BatchID</li>
+                                        <li>📅 <strong>Expired:</strong> @edbatch.ExpiredDate?.ToString("yyyy-MM-dd")</li>
+                                        <li>📊 <strong>Bin Qty:</strong> @edbatch.BinQty?.ToString("F2")</li>
+                                        @* <p class="fw-bold text-end text-success">
+                                            Total: @edbatch.TotalQuantity
+                                        </p> 
+                                    }
+                                </ul>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        } *@
+        }
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            No Item.
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modaladdNewEDBatch">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form id="modalFormEDBatch">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="lblModalTitle">Product Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="NIEBPOM" class="form-label">NIE_BPOM</label>
+                        <input type="text" class="form-control" id="NIEBPOM" name="NIEBPOM" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Batch" class="form-label">Batch</label>
+                        <input type="text" class="form-control" id="Batch" name="Batch" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ExpiredDate" class="form-label">Expired Date</label>
+                        <input type="date" class="form-control" id="ExpiredDate" name="ExpiredDate" min="@DateTime.Now.Date.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control qty-userinput" id="Quantity" name="Quantity" min="0" step="0.01" required />
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="btnSaveModal" value="edbatch">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modaladdNewBin">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form id="modalFormNewBin">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="lblModalTitle">Product Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="BinSelect" class="form-label">Select Bin</label>
+                        <select class="form-select" id="BinSelect" name="BinID" required style="overflow-y:auto; min-height:auto; max-height:150px;">
+                            <option value="">-- Select Bin --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control qty-userinput" id="Quantity" name="Quantity" min="0" step="0.01" required />
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="btnSaveModal" value="bin">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

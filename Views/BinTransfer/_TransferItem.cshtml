@@ -1,0 +1,148 @@
+@model JsonElement
+@using System.Text.Json
+
+@{
+    int fromBinID = Model.GetProperty("fromBinID").GetInt32();
+    string fromBinName = Model.GetProperty("fromBinName").GetString() ?? string.Empty;
+    int toBinID = Model.GetProperty("toBinID").GetInt32();
+    string toBinName = Model.GetProperty("toBinName").GetString() ?? string.Empty;
+    var itemsList = Model.GetProperty("selectedItemsPayload").EnumerateArray().ToList();
+    
+    // Generate unique index based on current count of transfer groups
+    var groupIndex = DateTime.Now.Ticks % 10000;
+    var itemCount = itemsList.Count;
+    decimal totalQty = 0;
+    
+    foreach (var item in itemsList)
+    {
+        if (item.TryGetProperty("TotalQuantity", out var qtyProp))
+        {
+            if (qtyProp.ValueKind == JsonValueKind.Number)
+            {
+                totalQty += qtyProp.GetDecimal();
+            }
+            else if (qtyProp.ValueKind == JsonValueKind.String)
+            {
+                if (decimal.TryParse(qtyProp.GetString(), CultureInfo.InvariantCulture, out var parsedQty))
+                {
+                    totalQty += parsedQty;
+                }
+            }
+        }
+    }
+}
+
+@if (!itemsList.Any())
+{
+    <div class="text-center py-4">
+        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-2">No transfers added yet. Click "Add Transfer" to begin.</p>
+    </div>
+}
+else
+{ 
+    <div class="transfer-group completed" data-group-index="@groupIndex">
+        <div class="transfer-group-header">
+            <div>
+                <span class="step-indicator completed">
+                    <i class="bi bi-check-circle"></i>
+                </span>
+                <strong>Transfer Group</strong>
+            </div>
+            <div>
+                <button class="btn btn-sm btn-outline-danger btn-remove-transfer" data-group-index="@groupIndex">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="row align-items-center mb-2">
+            <div class="col-5">
+                <span class="bin-badge bg-primary text-white" data-from-binid="@fromBinID">
+                    <i class="bi bi-box"></i> @fromBinName
+                </span>
+            </div>
+            <div class="col-2 text-center">
+                <i class="bi bi-arrow-right transfer-arrow"></i>
+            </div>
+            <div class="col-5 text-end">
+                <span class="bin-badge bg-success text-white" data-to-binid="@toBinID">
+                    <i class="bi bi-box-arrow-in-right"></i> @toBinName
+                </span>
+            </div>
+        </div>
+
+        <div class="items-preview mt-3">
+            <div class="accordion" id="accordion@(groupIndex)">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading@(groupIndex)">
+                        <button class="accordion-button collapsed" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#collapse@(groupIndex)"
+                                data-item-count="@itemCount" 
+                                data-total-qty="@totalQty.ToString("N2", CultureInfo.InvariantCulture)"
+                                aria-expanded="false" aria-controls="collapse@(groupIndex)">
+                            <i class="bi bi-list-ul me-2"></i> @itemCount Item(s) - 
+                            Total Qty: @totalQty.ToString("N2", CultureInfo.InvariantCulture)
+                        </button>
+                    </h2>
+                    <div id="collapse@(groupIndex)" class="accordion-collapse collapse" 
+                         aria-labelledby="heading@(groupIndex)" data-bs-parent="#accordion@(groupIndex)">
+                        <div class="accordion-body">
+                            @foreach (var item in itemsList)
+                            {
+                                string itemID = item.GetProperty("ItemID").GetString() ?? "";
+                                string itemName = item.GetProperty("ItemName").GetString() ?? "";
+                                string totalQuantityStr = "";
+                                string variantCountStr = "";
+                                
+                                if (item.TryGetProperty("TotalQuantity", out var qtyProp))
+                                {
+                                    if (qtyProp.ValueKind == JsonValueKind.Number)
+                                    {
+                                        totalQuantityStr = qtyProp.GetDecimal().ToString("N2");
+                                    }
+                                    else if (qtyProp.ValueKind == JsonValueKind.String)
+                                    {
+                                        if (decimal.TryParse(qtyProp.GetString(), CultureInfo.InvariantCulture, out var parsedQty))
+                                        {
+                                            totalQuantityStr = parsedQty.ToString("N2");
+                                        }
+                                        else
+                                        {
+                                            totalQuantityStr = qtyProp.GetString() ?? "0";
+                                        }
+                                    }
+                                }
+                                
+                                if (item.TryGetProperty("VariantCount", out var variantProp))
+                                {
+                                    if (variantProp.ValueKind == JsonValueKind.Number)
+                                    {
+                                        variantCountStr = variantProp.GetInt32().ToString();
+                                    }
+                                    else if (variantProp.ValueKind == JsonValueKind.String)
+                                    {
+                                        variantCountStr = variantProp.GetString() ?? "0";
+                                    }
+                                }
+                                
+                                <div class="mb-3 p-2 bg-white border rounded">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="flex-grow-1">
+                                            <strong>@itemName</strong><br>
+                                            <small class="text-muted">@itemID</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-secondary me-2">@variantCountStr variant(s)</span>
+                                            <span class="badge bg-primary fs-6">@totalQuantityStr</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

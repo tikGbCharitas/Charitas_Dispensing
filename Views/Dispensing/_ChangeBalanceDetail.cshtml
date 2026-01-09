@@ -1,0 +1,116 @@
+﻿@model DispensingViewModel.DispensingBinViewModel
+
+<div class="modal fade" id="binItemModal" tabindex="-1" aria-labelledby="binItemModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="binItemModalLabel">@Model.ItemName (Total: <span id="modalFrontEndTotalQty" class="text-warning">@Model.FrontEndTotalQty.ToString(CultureInfo.InvariantCulture)</span>)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row g-3">
+                    <!-- Container 1: Selected items -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center border-3" id="modalCont1" data-bs-toggle="collapse" data-bs-target="#selectedCollapse" onclick="ChangeArrow(this)">
+                                <strong>Selected Items</strong>
+                                <i class="bi bi-chevron-up"></i>
+                            </div>
+                            <div id="selectedCollapse" class="collapse show">
+                                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                                    <div id="SelectedItem" class="d-flex flex-column gap-2">
+                                        @foreach (var data in Model.FrontEndData.EnumerateArray())
+                                        {
+                                            <div class="card border border-secondary-subtle shadow-sm">
+                                                <div class="card-body py-2 px-3 item-card front-end-data" data-binid="@data.GetProperty("BinID").GetString()" data-bpom="@data.GetProperty("NIE_BPOM").GetString()!.Trim()"
+                                                     data-batch="@data.GetProperty("Batch").GetString()!.Trim()" data-expireddate="@data.GetProperty("ExpiredDate").GetString()!.Trim()">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <div class="fw-bold text-primary">@data.GetProperty("BinName").GetString()!.Trim()</div>
+                                                            <div class="small text-muted">Nie_BPOM: @data.GetProperty("NIE_BPOM").GetString()!.Trim()</div>
+                                                            <div class="small text-muted">Batch: @data.GetProperty("Batch").GetString()!.Trim()</div>
+                                                            <div class="small text-muted">Exp: @data.GetProperty("ExpiredDate").GetString()!.Trim()</div>
+                                                        </div>
+
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <input type="number" class="form-control form-control-sm qty-input text-end"
+                                                                   min="0" value="@data.GetProperty("Qty").GetString()" style="width: 80px;">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div id="NewSelectedItem" class="d-flex flex-column gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Container 2: Bin list -->
+                    <div class="col-lg-4 col-md-5">
+                        <div class="card h-100 border-0">
+                            <div class="card-header d-flex justify-content-between align-items-center" id="modalCont2" data-bs-toggle="collapse" data-bs-target="#binsCollapse" onclick="ChangeArrow(this)">
+                                <strong>Bins</strong>
+                                <i class="bi bi-chevron-up"></i>
+                            </div>
+                            <div id="binsCollapse" class="collapse show">
+                                <div class="card-body p-2">
+                                    <div class="list-group" id="binList" style="max-height:380px; overflow:auto;">
+                                        <!-- Bin items akan di-load via AJAX -->
+                                        @foreach(var bin in Model.BinList)
+                                        {
+                                            <button type="button"
+                                                    class="list-group-item list-group-item-action py-2 px-3 fw-semibold selectbin"
+                                                    onclick="LoadBinDetail(this, '@bin.BinID')">
+                                                <i class="bi bi-box-seam me-2 text-secondary"></i>@bin.BinName
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Container 3: Items dari Bin -->
+                    <div class="col-lg-8 col-md-7">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center" id="modalCont3" data-bs-toggle="collapse" data-bs-target="#itemsCollapse" onclick="ChangeArrow(this)">
+                                <strong>Item List</strong>
+                                <i class="bi bi-chevron-up"></i>
+                            </div>
+                            <div id="itemsCollapse" class="collapse show">
+                                <div class="card border border-secondary-subtle shadow-sm">
+                                    <div id="itemList">
+                                        <div class="m-3 text-muted text-center modalfirst load">Select a Bin</div>
+                                        <div id="itemTemplate" class="card-body py-2 px-3 item-card d-none" data-barcode="barcode"
+                                             data-bpom="bpom" data-batch="batch" data-expireddate="ed" data-bin-name="binName"
+                                             data-binid="binid" onclick=" AddToSelectedItem(this)">
+                                            <div class="card border border-secondary-subtle shadow-sm">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <div class="small">Nie_BPOM: <span class="bpom"></span></div>
+                                                        <div class="small">Batch: <span class="batch"></span></div>
+                                                        <div class="small">Exp: <span class="expired"></span></div>
+                                                        <div class="small">Qty: <span class="qty"></span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end col items -->
+
+                </div> <!-- end row -->
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelModal" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnSaveModal" onclick="saveDatabase(this, '@Model.PrescriptionNo', '@Model.ItemID')">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

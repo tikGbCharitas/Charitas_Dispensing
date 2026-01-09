@@ -1,0 +1,22 @@
+﻿@model IEnumerable<ServiceUnitTransactionEntryViewModel.BinItem>
+
+@* <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"> *@
+<div class="row row-cols-1 row-cols-sm-2 g-3">
+    @foreach(var data in Model)
+    {
+        <div class="col">
+            <div class="card-body card-clickable mt-3 border border-secondary" data-is-modified="false"
+                 data-item-id="@data.MultiBatchBalanceBin.ItemID" data-nie-bpom="@data.MultiBatchBalanceBin.NIE_BPOM" data-batch-id="@data.MultiBatchBalanceBin.BatchID" data-expired-date="@data.MultiBatchBalanceBin.ExpiredDate">
+                <h5 class="card-title fw-bold">@data.ItemName</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><strong>🆔 ItemID: </strong><span id="modalItemID">@data.MultiBatchBalanceBin.ItemID</span></li>
+                    <li><strong>🔖 NIE BPOM: </strong><span id="modalNIEBPOM">@data.MultiBatchBalanceBin.NIE_BPOM</span></li>
+                    <li><strong>📦 Batch: </strong><span id="modalBatch">@data.MultiBatchBalanceBin.BatchID</span></li>
+                    <li><strong>📅 Expired: </strong><span id="modalExpiredDate">@(data.MultiBatchBalanceBin.ExpiredDate.ToString("yyyy-MM-dd"))</span></li>
+                    <li><strong>🗄️ Bin Qty: </strong><span id="modalQty">@(data.MultiBatchBalanceBin.Quantity)</span></li>
+                    @* <li><strong>📊 Balance: </strong>@(data.MultiBatchBalanceBin.Quantity)</li> *@
+                </ul>
+            </div>
+        </div>
+    }    
+</div>

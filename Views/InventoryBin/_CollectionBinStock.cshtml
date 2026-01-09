@@ -1,0 +1,44 @@
+﻿@model List<InventoryBinViewModel.ItemList>
+@{
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+}
+
+@foreach (var data in Model)
+{
+    <div class="card-clickable border p-2 mb-3 rounded shadow-sm @(!data.isOpen && data.BinQty > 0 ? "bg-danger text-white" : "bg-white text-black")" id="@data.MultiBatchBalanceBinID" data-isopen="@data.isOpen">
+        <div><strong>@CommonLocalizer["Item"]:</strong> @Html.HighlightSearch(data.ItemName) - (@Html.HighlightSearch(data.ItemID))</div>
+        <div><strong>@CommonLocalizer["BinName"]:</strong> @Html.HighlightSearch(data.BinName)</div>
+        <div><strong>@CommonLocalizer["NIEBPOM"]:</strong> @Html.HighlightSearch(data.NIE_BPOM)</div>
+        <div><strong>@CommonLocalizer["Batch"]:</strong> @Html.HighlightSearch(data.BatchID)</div>
+        <div><strong>@CommonLocalizer["ExpiredDate"]:</strong> @Html.HighlightSearch(data.ExpiredDate)</div>
+        <div><strong>@CommonLocalizer["Barcode"]:</strong> @Html.HighlightSearch(data.Barcode)</div>
+        @if (ViewBag.Mode == AppEnum.DataMode.View || ViewBag.Mode == null || string.IsNullOrEmpty(ViewBag.Mode?.ToString()))
+        {
+            <div><strong>@CommonLocalizer["BinQty"]:</strong> @data.BinQty.ToString(CultureInfo.InvariantCulture)</div>
+        }
+        else
+        {
+            <div class="d-flex align-items-center flex-wrap mb-2 lock-unlock-container">
+                <strong class="me-3">@CommonLocalizer["BinQty"]: </strong>
+                <input type="number" class="form-control form-control-sm text-center w-auto qty-input" max="@data.MaxBinQty?.ToString(CultureInfo.InvariantCulture)" min="0"
+                       data-mbbb-id="@data.MultiBatchBalanceBinID" data-binqty="@data.BinQty.ToString(CultureInfo.InvariantCulture)" value="@data.BinQty.ToString(CultureInfo.InvariantCulture)" onchange="ChangedQty(this)"
+                       @(!data.isOpen && data.BinQty > 0 ? "disabled" : "") />
+                @if (!data.isOpen && data.BinQty > 0)
+                {
+                    <button type="button" class="btn btn-sm btn-success rounded-pill shadow-sm ms-3 unlockbin" data-mbbb-id="@data.MultiBatchBalanceBinID">
+                        @Localizer["Unlock"]
+                    </button>
+                    <span class="ms-2 mt-2 mt-sm-0 badge text-dark bg-info border border-warning rounded-pill px-3 py-2 shadow-sm">
+                        @Localizer["UnlockWarning"]
+                    </span>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-sm btn-warning rounded-pill shadow-sm ms-3 resetqty" data-mbbb-id="@data.MultiBatchBalanceBinID">
+                        <i class="bi bi-arrow-counterclockwise"></i> @CommonLocalizer["Reset"]
+                    </button>
+                }
+            </div>
+        }
+    </div>
+}

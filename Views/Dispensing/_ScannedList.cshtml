@@ -1,0 +1,27 @@
+﻿@model IEnumerable<DispensingViewModel.DispensingListViewModel>
+
+<!-- Container 2: Scanned Barcodes -->
+
+<div class="card-body p-2">
+    <ul class="list-group" id="barcodeList">
+         @if (Model == null || !Model.Any())
+        {
+            <li class="list-group-item text-muted text-center border-0" id="noBarcodeText">
+                No scanned barcodes yet
+            </li>
+        }
+        else
+        {
+            foreach (var Transaction in Model)
+            {
+                <li class="list-group-item list-group-item-action barcode-item" style="cursor: pointer;" 
+                    data-barcode="@Transaction.PrescriptionNo" data-patient="@Transaction.Patient" data-regno="@Transaction.RegistrationNo" data-approved="@Transaction.Approved"
+                    data-medical-no="@Transaction.MedicalNo" data-sex="@Transaction.Sex" data-weight="@Transaction.Weight" data-height="@Transaction.Height"
+                    data-delivered="@Transaction.DeliverDateTime" data-age="@Transaction.Age" onclick="SelectedPrescriptionNo(this)">
+                    @Transaction.PrescriptionNo -
+                    @(string.IsNullOrWhiteSpace(Transaction.RegistrationNo) ? "[NOT FOUND]" : Transaction.Patient)
+                </li>
+            }
+        }
+    </ul>
+</div>

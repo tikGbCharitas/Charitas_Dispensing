@@ -1,0 +1,252 @@
+@inject IStringLocalizerFactory Factory
+@model AvicennaDispensing.ViewModels.Shared.LocationViewModel
+@using System.Reflection
+
+@{
+    ViewData["Title"] = "Bin Transfer";
+    var CommonLocalizer = Factory.Create("Views.Shared.Common", Assembly.GetExecutingAssembly().GetName().Name!);
+}
+
+@section Styles {
+    <link href="@Url.Content("~/css/Pages/BinTransfer.css")" rel="stylesheet" />
+}
+
+<div class="container-fluid px-2 px-md-4 py-3">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <h2 class="mb-0 text-primary fw-bold">
+            <i class="bi bi-arrow-left-right"></i> @CommonLocalizer["BinTransfer"]
+        </h2>
+        <button type="button" class="btn btn-success btn-sm" id="btnProcessTransfer" disabled>
+            <i class="bi bi-check-circle"></i> @Localizer["ProcessTransfer"]"
+        </button>
+    </div>
+
+    <!-- Location Selection -->
+    @await Html.PartialAsync("_Location", Model)
+
+    @if (!string.IsNullOrWhiteSpace(Model?.SelectedLocationID))
+    {
+        <!-- Transfer Panel -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-check"></i> @Localizer["TransferItems"]
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="transferContainer">
+                            <!-- Transfer groups will be added here dynamically -->
+                        </div>
+
+                        <div class="text-center py-4" id="emptyState">
+                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">@Localizer["Note"]</p>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary w-100 mt-3" id="btnAddTransfer">
+                            <i class="bi bi-plus-circle"></i> @Localizer["AddTransfer"]
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="card shadow-sm border-0 mb-3" id="summaryCard" style="display: none;">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle"></i> @Localizer["TransferSummary"]
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 col-md-4">
+                        <div class="p-2">
+                            <h3 class="mb-0 text-primary" id="totalTransfers">0</h3>
+                            <small class="text-muted">@Localizer["TotalItems"]</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="p-2">
+                            <h3 class="mb-0 text-success" id="totalItems">0</h3>
+                            <small class="text-muted">@Localizer["TotalVariant"]</small>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-2">
+                            <h3 class="mb-0 text-warning" id="totalQuantity">0</h3>
+                            <small class="text-muted">@Localizer["TotalQuantity"]</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Single Multi-Step Wizard Modal -->
+<div class="modal fade" id="transferWizardModal" tabindex="-1" aria-labelledby="transferWizardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <!-- Modal Header with Step Indicator -->
+            <div class="modal-header border-bottom-0">
+                <div class="w-100">
+                    <h5 class="modal-title mb-3" id="transferWizardModalLabel">
+                        <i class="bi bi-arrow-left-right"></i> @Localizer["TransferWizard"]
+                    </h5>
+                    <!-- Step Progress -->
+                    <div class="wizard-steps d-flex align-items-center justify-content-between">
+                        <div class="step active d-flex align-items-center" data-step="1">
+                            <span class="step-number">1</span>
+                            <span class="step-label d-none d-md-inline ms-2">@Localizer["SelectBin"]</span>
+                        </div>
+                        <div class="step-divider flex-grow-1 mx-2"></div>
+                        <div class="step d-flex align-items-center" data-step="2">
+                            <span class="step-number">2</span>
+                            <span class="step-label d-none d-md-inline ms-2">@Localizer["SelectItems"]</span>
+                        </div>
+                        <div class="step-divider flex-grow-1 mx-2"></div>
+                        <div class="step d-flex align-items-center" data-step="3">
+                            <span class="step-number">3</span>
+                            <span class="step-label d-none d-md-inline ms-2">@Localizer["Destination"]</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body with Step Content -->
+            <div class="modal-body">
+                <!-- Step 1: Select Source Bin -->
+                <div class="wizard-content" id="step1Content">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-box text-primary" style="font-size: 3rem;"></i>
+                        <h5 class="mt-2">@Localizer["SelectSourceBin"]</h5>
+                        <p class="text-muted">@Localizer["Note2"]</p>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="wizardBinSearch" placeholder="@Localizer["SearchBin"]">
+                        <button type="button" class="btn btn-primary" id="wizardBinSearchButton">
+                            <i class="bi bi-search"></i> @CommonLocalizer["Search"]
+                        </button>
+                    </div>
+                    <div id="wizardBinListContainer" class="list-group" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Bin list will be loaded here -->
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <span class="text-muted">@Localizer["Note5"]</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Items -->
+                <div class="wizard-content" id="step2Content" style="display: none;">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-cart text-success" style="font-size: 3rem;"></i>
+                        <h5 class="mt-2">@Localizer["Note3"]</h5>
+                        <p class="text-muted">@Localizer["From Bin"]: <span id="wizardSelectedBinName" class="badge bg-primary"></span></p>
+                    </div>
+                    <div class="row mb-3 g-2">
+                        <div class="col-12 col-lg-8 mb-2 mb-lg-0">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="wizardItemSearch" placeholder="@Localizer["SearchItems"]">
+                                <button type="button" class="btn btn-primary" id="wizardItemSearchButton">
+                                    <i class="bi bi-search"></i> @CommonLocalizer["Search"]
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="d-flex gap-2 justify-content-lg-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" id="wizardSelectAll">
+                                    <i class="bi bi-check-all"></i> <span class="d-none d-md-inline">@CommonLocalizer["All"]</span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="wizardDeselectAll">
+                                    <i class="bi bi-x-circle"></i> <span class="d-none d-md-inline">@CommonLocalizer["Clear"]</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="wizardItemListContainer" style="max-height: 350px; overflow-y: auto;">
+                        <!-- Item list will be loaded here -->
+                    </div>
+                    <div class="mt-3 p-2 bg-light rounded">
+                        <strong>@Localizer["Selected"]: <span id="wizardSelectedItemCount" class="badge bg-info">0</span> @CommonLocalizer["item(s)"]</strong>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <span class="text-muted">@Localizer["Note5"]</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Select Destination -->
+                <div class="wizard-content" id="step3Content" style="display: none;">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-box-arrow-in-right text-warning" style="font-size: 3rem;"></i>
+                        <h5 class="mt-2">@Localizer["SelectDestinationBin"]</h5>
+                        <p class="text-muted">@Localizer["Note4"]</p>
+                    </div>
+                    <div class="transfer-summary-box p-3 p-md-4 bg-light rounded mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">@Localizer["From"]:</label>
+                                <div class="p-2 bg-white rounded border">
+                                    <i class="bi bi-box text-primary"></i>
+                                    <span id="wizardSummarySourceBin" class="ms-2"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">@Localizer["SelectedItems"]:</label>
+                                <div class="p-2 bg-white rounded border">
+                                    <i class="bi bi-cart text-success"></i>
+                                    <span id="wizardSummaryItemCount" class="ms-2"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="wizardDestinationBinSelect" class="form-label fw-bold">
+                            <i class="bi bi-arrow-right"></i> @Localizer["DestinationBin"]:
+                        </label>
+                        <select class="form-select form-select-lg" id="wizardDestinationBinSelect">
+                            <option value="">-- @Localizer["SelectDestinationBin"] --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer with Navigation -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> <span class="d-none d-md-inline">@CommonLocalizer["Cancel"]</span>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="wizardBtnPrev" style="display: none;">
+                    <i class="bi bi-arrow-left"></i> <span class="d-none d-md-inline">@CommonLocalizer["Previous"]</span>
+                </button>
+                <button type="button" class="btn btn-primary" id="wizardBtnNext" disabled>
+                    <span class="d-none d-md-inline">@CommonLocalizer["Next"]</span> <i class="bi bi-arrow-right"></i>
+                </button>
+                <button type="button" class="btn btn-success" id="wizardBtnFinish" style="display: none;">
+                    <i class="bi bi-check-circle"></i> <span class="d-none d-md-inline">@Localizer["AddTransfer"]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const GetBinsWithItemCountUrl = '@Url.Action("GetBinsWithItemCount")';
+        const GetBinItemsUrl = '@Url.Action("GetBinItems")';
+        const GetAvailableBinsUrl = '@Url.Action("GetAvailableBins")';
+        const AddTransferGroupUrl = '@Url.Action("AddTransferGroup")';
+        const ProcessTransferUrl = '@Url.Action("ProcessTransfer")';
+    </script>
+    <script src="@Url.Content("~/js/Pages/BinTransfer.js")"></script>
+}

@@ -1,0 +1,53 @@
+﻿@{
+    Layout = null;
+    var statusCode = ViewData["StatusCode"] ?? 0;
+    var errorMessage = ViewData["ErrorMessage"] ?? "Unknown error";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Error @statusCode</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8d7da;
+            color: #721c24;
+            margin: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            font-size: 1.25rem;
+        }
+
+        a {
+            color: #721c24;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Error @statusCode</h1>
+        <p>@errorMessage</p>
+        <p>
+            <a href="/">Go back to Home</a>
+        </p>
+    </div>
+</body>
+</html>
